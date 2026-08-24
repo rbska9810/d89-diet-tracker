@@ -4,7 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07111f">
+  <meta name="application-name" content="D-89 트래커">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="D-89 트래커">
   <meta name="description" content="D-89 다이어트 프로젝트 모바일 기록 트래커">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icon-192.png">
   <title>D-89 다이어트 & 운동 트래커</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -339,6 +345,16 @@
           <button id="profileSaveButton" type="submit" class="min-h-12 flex-1 rounded-2xl bg-lime px-4 text-sm font-black text-ink transition active:scale-[.98]">목표 설정 저장</button>
         </div>
       </form>
+
+      <section class="mt-4 rounded-3xl border border-lime/20 bg-lime/[.07] p-5 shadow-glow">
+        <div class="mb-4">
+          <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-lime">Install App</p>
+          <h3 class="text-lg font-extrabold text-white">홈 화면에 앱 설치</h3>
+          <p id="installGuide" class="mt-1 text-sm leading-relaxed text-slate-400">설치하면 주소창 없이 실행하고, 한 번 접속한 뒤에는 오프라인에서도 사용할 수 있습니다.</p>
+        </div>
+        <button id="installButton" type="button" class="min-h-12 w-full rounded-2xl bg-lime px-4 text-sm font-black text-ink transition active:scale-[.98]">홈 화면에 설치</button>
+        <p id="installFeedback" class="mt-3 min-h-5 text-xs font-bold text-slate-400" aria-live="polite"></p>
+      </section>
 
       <section class="mt-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
         <div class="mb-4">
@@ -725,8 +741,58 @@
       routineList.innerHTML = routine.exercises.map((exercise, index) => {
         const saved = today.exercises[exercise.id] || {};
         const isCardio = exercise.id === 'cardio';
-        const firstLabel = isCardio ? '속도/강도' : '무게 (kg)';
-        const secondLabel = isCardio ? '시간 (분)' : '횟수';
+        const cardioType = saved.cardioType || 'treadmill';
+        const cardioSpeed = saved.speed ?? (cardioType === 'treadmill' ? saved.weight : '') ?? '';
+        const cardioLevel = saved.level ?? (cardioType === 'stepmill' ? saved.weight : '') ?? '';
+        const cardioDuration = saved.duration ?? saved.reps ?? '';
+        const detailFields = isCardio ? `
+          <label class="mb-3 block">
+            <span class="mb-1.5 block text-[11px] font-bold text-slate-500">유산소 기구</span>
+            <select data-field="cardioType" aria-label="유산소 기구" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-extrabold text-white outline-none transition focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+              <option value="treadmill" ${cardioType === 'treadmill' ? 'selected' : ''}>런닝머신</option>
+              <option value="stepmill" ${cardioType === 'stepmill' ? 'selected' : ''}>스텝밀</option>
+            </select>
+          </label>
+          <div class="mb-3 rounded-xl border border-coral/15 bg-coral/[.07] px-3 py-2.5 text-xs font-bold leading-relaxed text-slate-300">
+            <p data-treadmill-guide class="${cardioType === 'treadmill' ? '' : 'hidden'}"><span class="text-coral">런닝머신 권장</span> · 경사도 10~12 · 속도 4.0~4.5<br><span class="text-slate-500">뛰지 말고 파워워킹으로 걷기</span></p>
+            <p data-stepmill-guide class="${cardioType === 'stepmill' ? '' : 'hidden'}"><span class="text-coral">스텝밀 권장</span> · 레벨 3~4</p>
+          </div>
+          <div data-treadmill-fields class="grid grid-cols-2 gap-2 ${cardioType === 'treadmill' ? '' : 'hidden'}">
+            <label class="block">
+              <span class="mb-1.5 block text-[11px] font-bold text-slate-500">경사도</span>
+              <input type="number" inputmode="decimal" min="0" step="0.5" data-field="incline" value="${escapeAttribute(saved.incline)}" placeholder="10 ~ 12" aria-label="런닝머신 경사도" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-600 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+            </label>
+            <label class="block">
+              <span class="mb-1.5 block text-[11px] font-bold text-slate-500">속도</span>
+              <input type="number" inputmode="decimal" min="0" step="0.1" data-field="speed" value="${escapeAttribute(cardioSpeed)}" placeholder="4.0 ~ 4.5" aria-label="런닝머신 속도" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-600 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+            </label>
+          </div>
+          <div data-stepmill-fields class="grid grid-cols-2 gap-2 ${cardioType === 'stepmill' ? '' : 'hidden'}">
+            <label class="block">
+              <span class="mb-1.5 block text-[11px] font-bold text-slate-500">레벨</span>
+              <input type="number" inputmode="decimal" min="0" step="0.5" data-field="level" value="${escapeAttribute(cardioLevel)}" placeholder="3 ~ 4" aria-label="스텝밀 레벨" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-600 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+            </label>
+            <label class="block">
+              <span class="mb-1.5 block text-[11px] font-bold text-slate-500">시간 (분)</span>
+              <input type="number" inputmode="numeric" min="0" step="1" data-field="duration" value="${escapeAttribute(cardioDuration)}" placeholder="15" aria-label="스텝밀 시간 (분)" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-600 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+            </label>
+          </div>
+          <label data-treadmill-time class="mt-2 block ${cardioType === 'treadmill' ? '' : 'hidden'}">
+            <span class="mb-1.5 block text-[11px] font-bold text-slate-500">시간 (분)</span>
+            <input type="number" inputmode="numeric" min="0" step="1" data-field="duration" value="${escapeAttribute(cardioDuration)}" placeholder="15" aria-label="런닝머신 시간 (분)" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-600 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+          </label>
+        ` : `
+          <div class="grid grid-cols-2 gap-2">
+            <label class="block">
+              <span class="mb-1.5 block text-[11px] font-bold text-slate-500">무게 (kg)</span>
+              <input type="number" inputmode="decimal" min="0" step="0.5" data-field="weight" value="${escapeAttribute(saved.weight)}" placeholder="0" aria-label="${exercise.name} 무게 (kg)" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+            </label>
+            <label class="block">
+              <span class="mb-1.5 block text-[11px] font-bold text-slate-500">횟수</span>
+              <input type="number" inputmode="numeric" min="0" step="1" data-field="reps" value="${escapeAttribute(saved.reps)}" placeholder="0" aria-label="${exercise.name} 횟수" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+            </label>
+          </div>
+        `;
         return `
           <article class="rounded-2xl border border-white/10 bg-ink/55 p-4" data-exercise="${exercise.id}">
             <div class="mb-3 flex items-center justify-between gap-3">
@@ -742,16 +808,7 @@
                 <input type="checkbox" data-field="done" ${saved.done ? 'checked' : ''} class="h-5 w-5 rounded accent-lime">
               </label>
             </div>
-            <div class="grid grid-cols-2 gap-2">
-              <label class="block">
-                <span class="mb-1.5 block text-[11px] font-bold text-slate-500">${firstLabel}</span>
-                <input type="number" inputmode="decimal" min="0" step="0.5" data-field="weight" value="${escapeAttribute(saved.weight)}" placeholder="0" aria-label="${exercise.name} ${firstLabel}" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
-              </label>
-              <label class="block">
-                <span class="mb-1.5 block text-[11px] font-bold text-slate-500">${secondLabel}</span>
-                <input type="number" inputmode="numeric" min="0" step="1" data-field="reps" value="${escapeAttribute(saved.reps)}" placeholder="0" aria-label="${exercise.name} ${secondLabel}" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
-              </label>
-            </div>
+            ${detailFields}
           </article>
         `;
       }).join('');
@@ -760,7 +817,18 @@
       const workoutEditButton = document.getElementById('workoutEditButton');
       const workoutSaveButton = document.getElementById('workoutSaveButton');
       const workoutFeedback = document.getElementById('workoutFeedback');
-      const workoutFields = Array.from(workoutForm.querySelectorAll('input'));
+      const workoutFields = Array.from(workoutForm.querySelectorAll('input, select'));
+
+      const paintCardioFields = card => {
+        if (!card) return;
+        const type = card.querySelector('[data-field="cardioType"]')?.value || 'treadmill';
+        const treadmill = type === 'treadmill';
+        card.querySelector('[data-treadmill-guide]')?.classList.toggle('hidden', !treadmill);
+        card.querySelector('[data-stepmill-guide]')?.classList.toggle('hidden', treadmill);
+        card.querySelector('[data-treadmill-fields]')?.classList.toggle('hidden', !treadmill);
+        card.querySelector('[data-stepmill-fields]')?.classList.toggle('hidden', treadmill);
+        card.querySelector('[data-treadmill-time]')?.classList.toggle('hidden', !treadmill);
+      };
 
       const paintWorkoutDraft = () => {
         const morningChecked = workoutForm.querySelectorAll('[data-morning-id]:checked').length;
@@ -783,7 +851,10 @@
 
       setWorkoutMode(!today.workoutSaved);
       paintWorkoutDraft();
-      workoutForm.addEventListener('input', paintWorkoutDraft);
+      workoutForm.addEventListener('input', event => {
+        if (event.target.dataset.field === 'cardioType') paintCardioFields(event.target.closest('[data-exercise]'));
+        paintWorkoutDraft();
+      });
       workoutEditButton.addEventListener('click', () => {
         workoutFeedback.textContent = '';
         setWorkoutMode(true);
@@ -798,11 +869,27 @@
         const exerciseValues = {};
         routineList.querySelectorAll('[data-exercise]').forEach(card => {
           const id = card.dataset.exercise;
-          exerciseValues[id] = {
-            done: card.querySelector('[data-field="done"]').checked,
-            weight: card.querySelector('[data-field="weight"]').value,
-            reps: card.querySelector('[data-field="reps"]').value
-          };
+          const done = card.querySelector('[data-field="done"]').checked;
+          if (id === 'cardio') {
+            const cardioType = card.querySelector('[data-field="cardioType"]').value;
+            const durationInput = cardioType === 'treadmill'
+              ? card.querySelector('[data-treadmill-time] [data-field="duration"]')
+              : card.querySelector('[data-stepmill-fields] [data-field="duration"]');
+            exerciseValues[id] = {
+              done,
+              cardioType,
+              incline: card.querySelector('[data-field="incline"]').value,
+              speed: card.querySelector('[data-field="speed"]').value,
+              level: card.querySelector('[data-field="level"]').value,
+              duration: durationInput.value
+            };
+          } else {
+            exerciseValues[id] = {
+              done,
+              weight: card.querySelector('[data-field="weight"]').value,
+              reps: card.querySelector('[data-field="reps"]').value
+            };
+          }
         });
         today.morningExercises = morningValues;
         today.morning = morningRoutine.every(item => morningValues[item.id]);
@@ -1148,6 +1235,62 @@
         location.hash = 'settings';
         location.reload();
       });
+
+      const installButton = document.getElementById('installButton');
+      const installGuide = document.getElementById('installGuide');
+      const installFeedback = document.getElementById('installFeedback');
+      let deferredInstallPrompt = null;
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+      if (isStandalone) {
+        installButton.disabled = true;
+        installButton.textContent = '설치된 앱입니다';
+        installButton.classList.add('opacity-60');
+        installFeedback.textContent = '현재 홈 화면 앱으로 실행 중입니다.';
+      }
+
+      window.addEventListener('beforeinstallprompt', event => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        installButton.disabled = false;
+        installButton.textContent = '홈 화면에 설치';
+        installFeedback.textContent = '설치 준비가 완료됐습니다.';
+        installFeedback.className = 'mt-3 min-h-5 text-xs font-bold text-lime';
+      });
+
+      window.addEventListener('appinstalled', () => {
+        deferredInstallPrompt = null;
+        installButton.disabled = true;
+        installButton.textContent = '설치 완료';
+        installFeedback.textContent = 'D-89 트래커를 홈 화면에 설치했습니다.';
+      });
+
+      installButton.addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice;
+          installFeedback.textContent = choice.outcome === 'accepted' ? '설치를 진행합니다.' : '설치를 취소했습니다.';
+          deferredInstallPrompt = null;
+          return;
+        }
+
+        const isiPhoneOrIPad = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        if (isiPhoneOrIPad) {
+          installGuide.textContent = 'Safari 하단의 공유 버튼을 누른 뒤 ‘홈 화면에 추가’를 선택하세요.';
+          installFeedback.textContent = 'iPhone은 Safari 공유 메뉴에서 설치할 수 있습니다.';
+        } else {
+          installGuide.textContent = '브라우저 메뉴에서 ‘앱 설치’ 또는 ‘홈 화면에 추가’를 선택하세요.';
+          installFeedback.textContent = '설치 메뉴가 없다면 페이지를 한 번 새로고침해 주세요.';
+        }
+      });
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(error => {
+            console.error('오프라인 기능을 준비하지 못했습니다.', error);
+          });
+        });
+      }
 
       const validViews = ['dashboard', 'today', 'routine', 'history', 'settings'];
       const showView = () => {
