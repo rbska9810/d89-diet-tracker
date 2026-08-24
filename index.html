@@ -24,6 +24,7 @@
       }
     };
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <style>
     html { color-scheme: dark; }
     body {
@@ -48,10 +49,84 @@
         <p id="todayLabel" class="mt-2 text-sm font-medium text-slate-400"></p>
       </div>
       <div class="rounded-2xl border border-lime/20 bg-lime/10 px-3 py-2 text-center shadow-glow">
-        <span class="block text-[10px] font-bold uppercase tracking-widest text-lime/70">Project</span>
-        <span class="text-xl font-black text-lime">D-89</span>
+        <span class="block text-[10px] font-bold uppercase tracking-widest text-lime/70">Goal</span>
+        <span id="projectDay" class="text-xl font-black text-lime">D-89</span>
       </div>
     </header>
+
+    <section class="mb-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
+      <div class="mb-5 flex items-start justify-between gap-3">
+        <div>
+          <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-lime">Body & Goal</p>
+          <h2 class="text-lg font-extrabold text-white">내 몸과 목표 설정</h2>
+          <p class="mt-1 text-sm text-slate-400">수치는 입력 즉시 저장돼요.</p>
+        </div>
+        <span id="bmiBadge" class="rounded-full bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-400">BMI —</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <label class="block">
+          <span class="mb-1.5 block text-[11px] font-bold text-slate-500">키 (cm)</span>
+          <input id="heightInput" data-profile="height" type="number" inputmode="decimal" min="100" max="250" step="0.1" placeholder="예: 170" class="w-full rounded-xl border border-white/10 bg-ink/70 px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+        </label>
+        <label class="block">
+          <span class="mb-1.5 block text-[11px] font-bold text-slate-500">시작 체중 (kg)</span>
+          <input id="startWeightInput" data-profile="startWeight" type="number" inputmode="decimal" min="20" max="400" step="0.1" placeholder="예: 85" class="w-full rounded-xl border border-white/10 bg-ink/70 px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+        </label>
+        <label class="block">
+          <span class="mb-1.5 block text-[11px] font-bold text-slate-500">목표 체중 (kg)</span>
+          <input id="goalWeightInput" data-profile="goalWeight" type="number" inputmode="decimal" min="20" max="400" step="0.1" placeholder="예: 70" class="w-full rounded-xl border border-white/10 bg-ink/70 px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+        </label>
+        <label class="block">
+          <span class="mb-1.5 block text-[11px] font-bold text-slate-500">목표 날짜</span>
+          <input id="targetDateInput" data-profile="targetDate" type="date" class="w-full rounded-xl border border-white/10 bg-ink/70 px-3 py-2.5 text-sm font-bold text-white outline-none transition focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+        </label>
+      </div>
+
+      <div class="my-4 border-t border-white/10"></div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <label class="block">
+          <span class="mb-1.5 block text-[11px] font-bold text-slate-500">체중 기록 날짜</span>
+          <input id="weightDateInput" type="date" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+        </label>
+        <label class="block">
+          <span class="mb-1.5 block text-[11px] font-bold text-slate-500">해당 날짜 체중 (kg)</span>
+          <input id="weightEntryInput" type="number" inputmode="decimal" min="20" max="400" step="0.1" placeholder="예: 82.4" class="w-full rounded-xl border border-lime/25 bg-lime/[.07] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-600 focus:border-lime focus:ring-2 focus:ring-lime/10">
+        </label>
+      </div>
+
+      <div class="mt-5 grid grid-cols-3 gap-2 text-center" aria-live="polite">
+        <div class="rounded-2xl bg-white/[.04] px-2 py-3">
+          <span class="block text-[10px] font-bold text-slate-500">최근 체중</span>
+          <strong id="currentWeightStat" class="mt-1 block text-base font-black text-white">—</strong>
+        </div>
+        <div class="rounded-2xl bg-white/[.04] px-2 py-3">
+          <span class="block text-[10px] font-bold text-slate-500">목표까지</span>
+          <strong id="remainingWeightStat" class="mt-1 block text-base font-black text-coral">—</strong>
+        </div>
+        <div class="rounded-2xl bg-white/[.04] px-2 py-3">
+          <span class="block text-[10px] font-bold text-slate-500">목표 달성률</span>
+          <strong id="goalProgressStat" class="mt-1 block text-base font-black text-lime">—</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
+      <div class="mb-4 flex items-end justify-between gap-3">
+        <div>
+          <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-coral">Weight Trend</p>
+          <h2 class="text-lg font-extrabold text-white">체중 변화 그래프</h2>
+        </div>
+        <span id="weightChangeLabel" class="text-xs font-bold text-slate-400">기록을 시작해 보세요</span>
+      </div>
+      <div class="relative h-52 w-full">
+        <canvas id="weightChart" role="img" aria-label="날짜별 체중 변화 그래프">날짜별 체중 변화 그래프</canvas>
+        <div id="chartEmpty" class="absolute inset-0 grid place-items-center rounded-2xl border border-dashed border-white/10 bg-ink/35 px-6 text-center text-sm font-medium leading-relaxed text-slate-500">
+          위에서 날짜와 체중을 입력하면<br>변화 추이가 여기에 표시됩니다.
+        </div>
+      </div>
+    </section>
 
     <section class="mb-4 overflow-hidden rounded-3xl border border-white/10 bg-panel shadow-glow">
       <div class="p-5">
@@ -204,6 +279,8 @@
 
       let store = readStore();
       store.days ||= {};
+      store.profile ||= { height: '', startWeight: '', goalWeight: '', targetDate: '' };
+      store.weights ||= {};
       store.days[dateKey] ||= { morning: false, exercises: {}, memo: '' };
       const today = store.days[dateKey];
       today.exercises ||= {};
@@ -222,6 +299,190 @@
       document.getElementById('routineTitle').textContent = routine.title;
       document.getElementById('routineSummary').textContent = routine.summary;
       document.getElementById('weekdayBadge').textContent = `${dayNames[weekday]}요일`;
+
+      const profileInputs = document.querySelectorAll('[data-profile]');
+      const weightDateInput = document.getElementById('weightDateInput');
+      const weightEntryInput = document.getElementById('weightEntryInput');
+      let weightChart = null;
+
+      const getWeightEntries = () => Object.entries(store.weights)
+        .map(([date, weight]) => ({ date, weight: Number(weight) }))
+        .filter(entry => Number.isFinite(entry.weight) && entry.weight > 0)
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      const getDday = targetDate => {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(targetDate || '')) return 'D-89';
+        const [year, month, day] = targetDate.split('-').map(Number);
+        const target = new Date(year, month - 1, day);
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const difference = Math.ceil((target - todayStart) / 86400000);
+        if (difference === 0) return 'D-Day';
+        return difference > 0 ? `D-${difference}` : `D+${Math.abs(difference)}`;
+      };
+
+      const renderWeightChart = entries => {
+        const empty = document.getElementById('chartEmpty');
+        empty.classList.toggle('hidden', entries.length > 0);
+
+        if (!entries.length || typeof Chart === 'undefined') {
+          if (weightChart) {
+            weightChart.destroy();
+            weightChart = null;
+          }
+          return;
+        }
+
+        const goalWeight = Number(store.profile.goalWeight);
+        const hasGoal = Number.isFinite(goalWeight) && goalWeight > 0;
+        const data = {
+          labels: entries.map(entry => entry.date.slice(5).replace('-', '.')),
+          datasets: [
+            {
+              label: '체중',
+              data: entries.map(entry => entry.weight),
+              borderColor: '#c6ff4a',
+              backgroundColor: 'rgba(198, 255, 74, .14)',
+              pointBackgroundColor: '#c6ff4a',
+              pointBorderColor: '#07111f',
+              pointBorderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              borderWidth: 2.5,
+              tension: .32,
+              fill: true
+            },
+            ...(hasGoal ? [{
+              label: `목표 ${goalWeight}kg`,
+              data: entries.map(() => goalWeight),
+              borderColor: '#ff725e',
+              borderWidth: 1.5,
+              borderDash: [5, 5],
+              pointRadius: 0,
+              pointHoverRadius: 0,
+              fill: false
+            }] : [])
+          ]
+        };
+
+        if (weightChart) {
+          weightChart.data = data;
+          weightChart.options.plugins.legend.display = hasGoal;
+          weightChart.update();
+          return;
+        }
+
+        weightChart = new Chart(document.getElementById('weightChart'), {
+          type: 'line',
+          data,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            animation: { duration: 350 },
+            plugins: {
+              legend: {
+                display: hasGoal,
+                labels: { color: '#94a3b8', boxWidth: 12, boxHeight: 2, usePointStyle: true }
+              },
+              tooltip: {
+                backgroundColor: '#07111f',
+                titleColor: '#f8fafc',
+                bodyColor: '#cbd5e1',
+                borderColor: 'rgba(255,255,255,.12)',
+                borderWidth: 1,
+                callbacks: { label: context => `${context.dataset.label}: ${context.parsed.y}kg` }
+              }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { color: '#64748b', maxTicksLimit: 5, maxRotation: 0 },
+                border: { color: 'rgba(255,255,255,.08)' }
+              },
+              y: {
+                grace: '8%',
+                title: { display: true, text: 'kg', color: '#64748b' },
+                grid: { color: 'rgba(255,255,255,.06)' },
+                ticks: { color: '#64748b' },
+                border: { display: false }
+              }
+            }
+          }
+        });
+      };
+
+      const renderBodyDashboard = () => {
+        const entries = getWeightEntries();
+        const latest = entries.at(-1)?.weight;
+        const first = entries[0]?.weight;
+        const height = Number(store.profile.height);
+        const startWeight = Number(store.profile.startWeight);
+        const goalWeight = Number(store.profile.goalWeight);
+        const hasLatest = Number.isFinite(latest);
+        const hasGoal = Number.isFinite(goalWeight) && goalWeight > 0;
+
+        document.getElementById('projectDay').textContent = getDday(store.profile.targetDate);
+        document.getElementById('currentWeightStat').textContent = hasLatest ? `${latest.toFixed(1)}kg` : '—';
+
+        const remaining = hasLatest && hasGoal ? latest - goalWeight : null;
+        document.getElementById('remainingWeightStat').textContent = remaining === null
+          ? '—'
+          : remaining <= 0 ? '달성!' : `${remaining.toFixed(1)}kg`;
+
+        const canCalculateProgress = hasLatest && hasGoal && Number.isFinite(startWeight) && startWeight !== goalWeight;
+        const progress = canCalculateProgress
+          ? Math.max(0, Math.min(100, ((startWeight - latest) / (startWeight - goalWeight)) * 100))
+          : null;
+        document.getElementById('goalProgressStat').textContent = progress === null ? '—' : `${Math.round(progress)}%`;
+
+        const bmi = hasLatest && Number.isFinite(height) && height > 0
+          ? latest / ((height / 100) ** 2)
+          : null;
+        document.getElementById('bmiBadge').textContent = bmi ? `BMI ${bmi.toFixed(1)}` : 'BMI —';
+
+        const changeLabel = document.getElementById('weightChangeLabel');
+        if (entries.length < 2) {
+          changeLabel.textContent = entries.length ? '첫 체중 기록 완료' : '기록을 시작해 보세요';
+          changeLabel.className = 'text-xs font-bold text-slate-400';
+        } else {
+          const change = latest - first;
+          changeLabel.textContent = change === 0
+            ? '첫 기록과 동일'
+            : `${Math.abs(change).toFixed(1)}kg ${change < 0 ? '감량' : '증가'}`;
+          changeLabel.className = change <= 0
+            ? 'text-xs font-bold text-lime'
+            : 'text-xs font-bold text-coral';
+        }
+
+        renderWeightChart(entries);
+      };
+
+      profileInputs.forEach(input => {
+        const field = input.dataset.profile;
+        input.value = store.profile[field] || '';
+        input.addEventListener('input', event => {
+          store.profile[field] = event.target.value;
+          save();
+          renderBodyDashboard();
+        });
+      });
+
+      weightDateInput.value = dateKey;
+      weightEntryInput.value = store.weights[dateKey] ?? '';
+      weightDateInput.addEventListener('change', event => {
+        weightEntryInput.value = store.weights[event.target.value] ?? '';
+      });
+      weightEntryInput.addEventListener('input', event => {
+        const selectedDate = weightDateInput.value || dateKey;
+        const value = event.target.value;
+        if (value === '') {
+          delete store.weights[selectedDate];
+        } else {
+          store.weights[selectedDate] = Number(value);
+        }
+        save();
+        renderBodyDashboard();
+      });
 
       const morningCheck = document.getElementById('morningCheck');
       const morningStatus = document.getElementById('morningStatus');
@@ -305,6 +566,7 @@
       });
 
       paintRoutineProgress();
+      renderBodyDashboard();
       save();
     })();
   </script>
