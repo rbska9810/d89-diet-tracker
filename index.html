@@ -204,6 +204,34 @@
       </form>
     </section>
 
+    <section data-view="history" class="hidden">
+      <div class="mb-5">
+        <p class="text-sm font-bold text-sky-400">HISTORY</p>
+        <h2 class="mt-1 text-3xl font-black tracking-tight text-white">주간 기록</h2>
+        <p class="mt-2 text-sm text-slate-400">일주일의 체중과 운동 출석을 확인하세요.</p>
+      </div>
+
+      <section class="mb-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
+        <div class="mb-4 flex items-center justify-between gap-2">
+          <button id="previousWeekButton" type="button" class="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[.04] text-lg font-black text-white transition active:scale-95" aria-label="이전 주">‹</button>
+          <div class="text-center">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Selected Week</p>
+            <strong id="weekRangeLabel" class="mt-1 block text-sm font-extrabold text-white"></strong>
+          </div>
+          <button id="nextWeekButton" type="button" class="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[.04] text-lg font-black text-white transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-30" aria-label="다음 주">›</button>
+        </div>
+        <button id="currentWeekButton" type="button" class="mb-4 min-h-10 w-full rounded-xl bg-white/[.05] text-xs font-extrabold text-slate-300 transition active:scale-[.99]">이번 주로 돌아가기</button>
+
+        <div class="mb-5 grid grid-cols-3 gap-2 text-center">
+          <div class="rounded-2xl bg-white/[.04] px-2 py-3"><span class="block text-[10px] font-bold text-slate-500">기록한 날</span><strong id="recordedDaysStat" class="mt-1 block text-base font-black text-white">0일</strong></div>
+          <div class="rounded-2xl bg-white/[.04] px-2 py-3"><span class="block text-[10px] font-bold text-slate-500">아침 완료</span><strong id="morningDaysStat" class="mt-1 block text-base font-black text-coral">0일</strong></div>
+          <div class="rounded-2xl bg-white/[.04] px-2 py-3"><span class="block text-[10px] font-bold text-slate-500">저녁 완료</span><strong id="eveningDaysStat" class="mt-1 block text-base font-black text-lime">0일</strong></div>
+        </div>
+
+        <div id="historyList" class="space-y-2"></div>
+      </section>
+    </section>
+
     <section data-view="settings" class="hidden">
       <div class="mb-5">
         <p class="text-sm font-bold text-slate-400">SETTINGS</p>
@@ -251,21 +279,39 @@
           <button id="profileSaveButton" type="submit" class="min-h-12 flex-1 rounded-2xl bg-lime px-4 text-sm font-black text-ink transition active:scale-[.98]">목표 설정 저장</button>
         </div>
       </form>
+
+      <section class="mt-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
+        <div class="mb-4">
+          <h3 class="text-lg font-extrabold text-white">데이터 관리</h3>
+          <p class="mt-1 text-sm leading-relaxed text-slate-400">기기를 바꾸기 전 백업 파일을 받아두면 기록을 다시 불러올 수 있습니다.</p>
+        </div>
+
+        <div class="space-y-2">
+          <button id="exportButton" type="button" class="min-h-12 w-full rounded-2xl bg-lime px-4 text-sm font-black text-ink transition active:scale-[.98]">백업 파일 받기</button>
+          <label for="importInput" class="flex min-h-12 cursor-pointer items-center justify-center rounded-2xl border border-white/15 bg-white/[.05] px-4 text-sm font-extrabold text-white transition active:scale-[.98]">백업 불러오기</label>
+          <input id="importInput" type="file" accept="application/json,.json" class="sr-only">
+          <button id="resetButton" type="button" class="min-h-12 w-full rounded-2xl border border-coral/30 bg-coral/10 px-4 text-sm font-extrabold text-coral transition active:scale-[.98]">전체 기록 초기화</button>
+        </div>
+        <p id="dataFeedback" class="mt-3 min-h-5 text-xs font-bold text-slate-400" aria-live="polite"></p>
+      </section>
     </section>
 
     <footer class="py-7 text-center text-xs font-medium text-slate-600">오늘도 어제보다 한 칸 앞으로.</footer>
   </main>
 
   <nav class="nav-safe fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-ink/95 px-3 pt-2 backdrop-blur-xl" aria-label="주요 메뉴">
-    <div class="mx-auto grid max-w-md grid-cols-4 gap-1">
+    <div class="mx-auto grid max-w-md grid-cols-5 gap-1">
       <a href="#dashboard" data-nav="dashboard" class="rounded-2xl px-2 py-2 text-center text-slate-500 transition">
         <span class="block text-lg" aria-hidden="true">●</span><span class="mt-0.5 block text-[11px] font-extrabold">홈</span>
       </a>
       <a href="#today" data-nav="today" class="rounded-2xl px-2 py-2 text-center text-slate-500 transition">
-        <span class="block text-lg" aria-hidden="true">＋</span><span class="mt-0.5 block text-[11px] font-extrabold">오늘 기록</span>
+        <span class="block text-lg" aria-hidden="true">＋</span><span class="mt-0.5 block text-[11px] font-extrabold">오늘</span>
       </a>
       <a href="#routine" data-nav="routine" class="rounded-2xl px-2 py-2 text-center text-slate-500 transition">
         <span class="block text-lg" aria-hidden="true">✓</span><span class="mt-0.5 block text-[11px] font-extrabold">운동</span>
+      </a>
+      <a href="#history" data-nav="history" class="rounded-2xl px-2 py-2 text-center text-slate-500 transition">
+        <span class="block text-lg" aria-hidden="true">▦</span><span class="mt-0.5 block text-[11px] font-extrabold">기록</span>
       </a>
       <a href="#settings" data-nav="settings" class="rounded-2xl px-2 py-2 text-center text-slate-500 transition">
         <span class="block text-lg" aria-hidden="true">⚙</span><span class="mt-0.5 block text-[11px] font-extrabold">설정</span>
@@ -705,7 +751,145 @@
         renderDashboard();
       });
 
-      const validViews = ['dashboard', 'today', 'routine', 'settings'];
+      const formatDateKey = date => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+      const startOfWeek = date => {
+        const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+        return monday;
+      };
+      let historyWeekOffset = 0;
+
+      const renderHistory = () => {
+        const monday = startOfWeek(now);
+        monday.setDate(monday.getDate() + historyWeekOffset * 7);
+        const weekDates = Array.from({ length: 7 }, (_, index) => {
+          const date = new Date(monday);
+          date.setDate(monday.getDate() + index);
+          return date;
+        });
+        const sunday = weekDates[6];
+        const shortDate = date => `${date.getMonth() + 1}.${date.getDate()}`;
+        document.getElementById('weekRangeLabel').textContent = `${monday.getFullYear()}.${shortDate(monday)} — ${sunday.getFullYear()}.${shortDate(sunday)}`;
+        document.getElementById('nextWeekButton').disabled = historyWeekOffset >= 0;
+        document.getElementById('currentWeekButton').classList.toggle('hidden', historyWeekOffset === 0);
+
+        let recordedDays = 0;
+        let morningDays = 0;
+        let eveningDays = 0;
+
+        const rows = weekDates.map(date => {
+          const key = formatDateKey(date);
+          const dayData = store.days[key] || {};
+          const morningValues = dayData.morningExercises || {};
+          const morningCount = dayData.morning === true
+            ? morningRoutine.length
+            : morningRoutine.filter(item => morningValues[item.id]).length;
+          const dayRoutine = routines[date.getDay()];
+          const dayExercises = dayData.exercises || {};
+          const eveningCount = dayRoutine.exercises.filter(item => dayExercises[item.id]?.done).length;
+          const hasWeight = hasOwn(store.weights, key) && Number.isFinite(Number(store.weights[key]));
+          const hasWorkout = Boolean(dayData.workoutSaved || morningCount || Object.keys(dayExercises).length);
+          const recorded = hasWeight || hasWorkout;
+          if (recorded) recordedDays += 1;
+          if (morningCount === morningRoutine.length) morningDays += 1;
+          if (eveningCount === dayRoutine.exercises.length) eveningDays += 1;
+
+          const isToday = key === dateKey;
+          const isFuture = date > new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          return `
+            <div class="flex items-center gap-3 rounded-2xl border ${isToday ? 'border-lime/30 bg-lime/[.06]' : 'border-white/10 bg-ink/45'} px-3 py-3 ${isFuture ? 'opacity-40' : ''}">
+              <div class="w-11 shrink-0 text-center">
+                <strong class="block text-sm font-black ${isToday ? 'text-lime' : 'text-white'}">${dayNames[date.getDay()]}</strong>
+                <span class="text-[10px] font-bold text-slate-500">${shortDate(date)}</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="rounded-full bg-coral/10 px-2 py-1 text-[10px] font-bold text-coral">아침 ${morningCount}/${morningRoutine.length}</span>
+                  <span class="rounded-full bg-lime/10 px-2 py-1 text-[10px] font-bold text-lime">저녁 ${eveningCount}/${dayRoutine.exercises.length}</span>
+                </div>
+              </div>
+              <div class="shrink-0 text-right">
+                <strong class="block text-sm font-black text-white">${hasWeight ? `${Number(store.weights[key]).toFixed(1)}kg` : '—'}</strong>
+                <span class="text-[10px] font-bold ${recorded ? 'text-sky-400' : 'text-slate-600'}">${recorded ? '기록됨' : '미기록'}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        document.getElementById('recordedDaysStat').textContent = `${recordedDays}일`;
+        document.getElementById('morningDaysStat').textContent = `${morningDays}일`;
+        document.getElementById('eveningDaysStat').textContent = `${eveningDays}일`;
+        document.getElementById('historyList').innerHTML = rows;
+      };
+
+      document.getElementById('previousWeekButton').addEventListener('click', () => {
+        historyWeekOffset -= 1;
+        renderHistory();
+      });
+      document.getElementById('nextWeekButton').addEventListener('click', () => {
+        if (historyWeekOffset < 0) historyWeekOffset += 1;
+        renderHistory();
+      });
+      document.getElementById('currentWeekButton').addEventListener('click', () => {
+        historyWeekOffset = 0;
+        renderHistory();
+      });
+
+      const dataFeedback = document.getElementById('dataFeedback');
+      document.getElementById('exportButton').addEventListener('click', () => {
+        const backup = {
+          app: 'D-89 Diet Tracker',
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          data: store
+        };
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `d89-backup-${dateKey}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        dataFeedback.textContent = '백업 파일을 저장했습니다.';
+        dataFeedback.className = 'mt-3 min-h-5 text-xs font-bold text-lime';
+      });
+
+      document.getElementById('importInput').addEventListener('change', async event => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        try {
+          const parsed = JSON.parse(await file.text());
+          const imported = parsed?.data || parsed;
+          const valid = imported && typeof imported === 'object'
+            && imported.days && typeof imported.days === 'object'
+            && imported.weights && typeof imported.weights === 'object'
+            && imported.profile && typeof imported.profile === 'object';
+          if (!valid) throw new Error('invalid backup');
+          if (!window.confirm('현재 기록을 백업 파일의 내용으로 덮어쓸까요?')) {
+            event.target.value = '';
+            return;
+          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(imported));
+          location.hash = 'dashboard';
+          location.reload();
+        } catch {
+          dataFeedback.textContent = '올바른 D-89 백업 파일이 아닙니다.';
+          dataFeedback.className = 'mt-3 min-h-5 text-xs font-bold text-coral';
+          event.target.value = '';
+        }
+      });
+
+      document.getElementById('resetButton').addEventListener('click', () => {
+        const approved = window.confirm('키, 목표, 체중, 운동 기록을 모두 삭제할까요? 이 작업은 되돌릴 수 없습니다.');
+        if (!approved) return;
+        localStorage.removeItem(STORAGE_KEY);
+        location.hash = 'settings';
+        location.reload();
+      });
+
+      const validViews = ['dashboard', 'today', 'routine', 'history', 'settings'];
       const showView = () => {
         let view = location.hash.replace('#', '') || 'dashboard';
         if (!validViews.includes(view)) view = 'dashboard';
@@ -720,6 +904,7 @@
           if (active) link.setAttribute('aria-current', 'page');
           else link.removeAttribute('aria-current');
         });
+        if (view === 'history') renderHistory();
         window.scrollTo(0, 0);
       };
 
