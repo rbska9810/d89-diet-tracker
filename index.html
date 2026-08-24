@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07111f">
-  <meta name="description" content="D-89 다이어트 프로젝트를 위한 모바일 운동 기록 트래커">
+  <meta name="description" content="D-89 다이어트 프로젝트 모바일 기록 트래커">
   <title>D-89 다이어트 & 운동 트래커</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -18,7 +18,7 @@
             coral: '#ff725e'
           },
           boxShadow: {
-            glow: '0 0 0 1px rgba(198,255,74,.12), 0 20px 60px rgba(0,0,0,.28)'
+            glow: '0 0 0 1px rgba(198,255,74,.1), 0 20px 60px rgba(0,0,0,.25)'
           }
         }
       }
@@ -30,14 +30,16 @@
     body {
       min-height: 100vh;
       background:
-        radial-gradient(circle at 85% -5%, rgba(198, 255, 74, .13), transparent 32%),
-        radial-gradient(circle at -10% 45%, rgba(255, 114, 94, .1), transparent 30%),
+        radial-gradient(circle at 90% -5%, rgba(198, 255, 74, .13), transparent 32%),
+        radial-gradient(circle at -10% 50%, rgba(255, 114, 94, .1), transparent 30%),
         #07111f;
       -webkit-tap-highlight-color: transparent;
     }
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button { opacity: .45; }
-    .safe-bottom { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+    input:disabled, textarea:disabled { opacity: .65; cursor: not-allowed; }
+    .safe-bottom { padding-bottom: max(7.5rem, calc(6rem + env(safe-area-inset-bottom))); }
+    .nav-safe { padding-bottom: max(.65rem, env(safe-area-inset-bottom)); }
   </style>
 </head>
 <body class="bg-ink text-slate-100 antialiased">
@@ -45,7 +47,7 @@
     <header class="mb-6 flex items-start justify-between gap-4">
       <div>
         <p class="mb-1 text-xs font-bold uppercase tracking-[.24em] text-lime">D-89 Challenge</p>
-        <h1 class="text-2xl font-black leading-tight tracking-tight text-white">D-89 다이어트 프로젝트</h1>
+        <h1 class="text-2xl font-black leading-tight tracking-tight text-white">다이어트 프로젝트</h1>
         <p id="todayLabel" class="mt-2 text-sm font-medium text-slate-400"></p>
       </div>
       <div class="rounded-2xl border border-lime/20 bg-lime/10 px-3 py-2 text-center shadow-glow">
@@ -54,139 +56,222 @@
       </div>
     </header>
 
-    <section class="mb-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
-      <div class="mb-5 flex items-start justify-between gap-3">
-        <div>
-          <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-lime">Body & Goal</p>
-          <h2 class="text-lg font-extrabold text-white">내 몸과 목표 설정</h2>
-          <p class="mt-1 text-sm text-slate-400">수치는 입력 즉시 저장돼요.</p>
-        </div>
-        <span id="bmiBadge" class="rounded-full bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-400">BMI —</span>
+    <section data-view="dashboard">
+      <div class="mb-5">
+        <p class="text-sm font-bold text-lime">HOME</p>
+        <h2 class="mt-1 text-3xl font-black tracking-tight text-white">오늘의 대시보드</h2>
+        <p class="mt-2 text-sm text-slate-400">저장된 기록을 한눈에 확인하세요.</p>
       </div>
+
+      <section class="mb-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
+        <div class="grid grid-cols-3 gap-2 text-center" aria-live="polite">
+          <div class="rounded-2xl bg-white/[.04] px-2 py-3">
+            <span class="block text-[10px] font-bold text-slate-500">최근 체중</span>
+            <strong id="currentWeightStat" class="mt-1 block text-base font-black text-white">—</strong>
+          </div>
+          <div class="rounded-2xl bg-white/[.04] px-2 py-3">
+            <span class="block text-[10px] font-bold text-slate-500">목표까지</span>
+            <strong id="remainingWeightStat" class="mt-1 block text-base font-black text-coral">—</strong>
+          </div>
+          <div class="rounded-2xl bg-white/[.04] px-2 py-3">
+            <span class="block text-[10px] font-bold text-slate-500">달성률</span>
+            <strong id="goalProgressStat" class="mt-1 block text-base font-black text-lime">—</strong>
+          </div>
+        </div>
+        <div class="mt-4">
+          <div class="mb-2 flex items-center justify-between text-xs font-bold">
+            <span class="text-slate-400">목표 체중 진행률</span>
+            <span id="goalProgressText" class="text-lime">설정 필요</span>
+          </div>
+          <div class="h-2 overflow-hidden rounded-full bg-white/10">
+            <div id="goalProgressBar" class="h-full w-0 rounded-full bg-gradient-to-r from-coral to-lime transition-all duration-500"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
+        <div class="mb-4 flex items-end justify-between gap-3">
+          <div>
+            <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-coral">Weight Trend</p>
+            <h3 class="text-lg font-extrabold text-white">체중 변화</h3>
+          </div>
+          <span id="weightChangeLabel" class="text-xs font-bold text-slate-400">기록 없음</span>
+        </div>
+        <div class="relative h-52 w-full">
+          <canvas id="weightChart" role="img" aria-label="날짜별 체중 변화 그래프">날짜별 체중 변화 그래프</canvas>
+          <div id="chartEmpty" class="absolute inset-0 grid place-items-center rounded-2xl border border-dashed border-white/10 bg-ink/35 px-6 text-center text-sm font-medium leading-relaxed text-slate-500">
+            오늘 기록 화면에서 체중을 저장하면<br>변화 추이가 표시됩니다.
+          </div>
+        </div>
+      </section>
 
       <div class="grid grid-cols-2 gap-3">
-        <label class="block">
-          <span class="mb-1.5 block text-[11px] font-bold text-slate-500">키 (cm)</span>
-          <input id="heightInput" data-profile="height" type="number" inputmode="decimal" min="100" max="250" step="0.1" placeholder="예: 170" class="w-full rounded-xl border border-white/10 bg-ink/70 px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
-        </label>
-        <label class="block">
-          <span class="mb-1.5 block text-[11px] font-bold text-slate-500">시작 체중 (kg)</span>
-          <input id="startWeightInput" data-profile="startWeight" type="number" inputmode="decimal" min="20" max="400" step="0.1" placeholder="예: 85" class="w-full rounded-xl border border-white/10 bg-ink/70 px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
-        </label>
-        <label class="block">
-          <span class="mb-1.5 block text-[11px] font-bold text-slate-500">목표 체중 (kg)</span>
-          <input id="goalWeightInput" data-profile="goalWeight" type="number" inputmode="decimal" min="20" max="400" step="0.1" placeholder="예: 70" class="w-full rounded-xl border border-white/10 bg-ink/70 px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
-        </label>
-        <label class="block">
-          <span class="mb-1.5 block text-[11px] font-bold text-slate-500">목표 날짜</span>
-          <input id="targetDateInput" data-profile="targetDate" type="date" class="w-full rounded-xl border border-white/10 bg-ink/70 px-3 py-2.5 text-sm font-bold text-white outline-none transition focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
-        </label>
-      </div>
-
-      <div class="my-4 border-t border-white/10"></div>
-
-      <div class="grid grid-cols-2 gap-3">
-        <label class="block">
-          <span class="mb-1.5 block text-[11px] font-bold text-slate-500">체중 기록 날짜</span>
-          <input id="weightDateInput" type="date" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
-        </label>
-        <label class="block">
-          <span class="mb-1.5 block text-[11px] font-bold text-slate-500">해당 날짜 체중 (kg)</span>
-          <input id="weightEntryInput" type="number" inputmode="decimal" min="20" max="400" step="0.1" placeholder="예: 82.4" class="w-full rounded-xl border border-lime/25 bg-lime/[.07] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-600 focus:border-lime focus:ring-2 focus:ring-lime/10">
-        </label>
-      </div>
-
-      <div class="mt-5 grid grid-cols-3 gap-2 text-center" aria-live="polite">
-        <div class="rounded-2xl bg-white/[.04] px-2 py-3">
-          <span class="block text-[10px] font-bold text-slate-500">최근 체중</span>
-          <strong id="currentWeightStat" class="mt-1 block text-base font-black text-white">—</strong>
-        </div>
-        <div class="rounded-2xl bg-white/[.04] px-2 py-3">
-          <span class="block text-[10px] font-bold text-slate-500">목표까지</span>
-          <strong id="remainingWeightStat" class="mt-1 block text-base font-black text-coral">—</strong>
-        </div>
-        <div class="rounded-2xl bg-white/[.04] px-2 py-3">
-          <span class="block text-[10px] font-bold text-slate-500">목표 달성률</span>
-          <strong id="goalProgressStat" class="mt-1 block text-base font-black text-lime">—</strong>
-        </div>
+        <a href="#today" class="rounded-3xl border border-white/10 bg-panel p-4 shadow-glow transition active:scale-[.98]">
+          <p class="text-xs font-bold text-coral">오늘 체중</p>
+          <strong id="todayWeightStatus" class="mt-2 block text-base font-black text-white">기록하기</strong>
+          <span class="mt-3 block text-xs font-bold text-slate-500">저장 / 수정 →</span>
+        </a>
+        <a href="#routine" class="rounded-3xl border border-white/10 bg-panel p-4 shadow-glow transition active:scale-[.98]">
+          <p class="text-xs font-bold text-lime">오늘 운동</p>
+          <strong id="todayWorkoutStatus" class="mt-2 block text-base font-black text-white">기록하기</strong>
+          <span class="mt-3 block text-xs font-bold text-slate-500">루틴 확인 →</span>
+        </a>
       </div>
     </section>
 
-    <section class="mb-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
-      <div class="mb-4 flex items-end justify-between gap-3">
-        <div>
-          <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-coral">Weight Trend</p>
-          <h2 class="text-lg font-extrabold text-white">체중 변화 그래프</h2>
-        </div>
-        <span id="weightChangeLabel" class="text-xs font-bold text-slate-400">기록을 시작해 보세요</span>
+    <section data-view="today" class="hidden">
+      <div class="mb-5">
+        <p class="text-sm font-bold text-coral">TODAY</p>
+        <h2 class="mt-1 text-3xl font-black tracking-tight text-white">오늘 기록</h2>
+        <p class="mt-2 text-sm text-slate-400">오늘 체중만 입력하고 저장하세요.</p>
       </div>
-      <div class="relative h-52 w-full">
-        <canvas id="weightChart" role="img" aria-label="날짜별 체중 변화 그래프">날짜별 체중 변화 그래프</canvas>
-        <div id="chartEmpty" class="absolute inset-0 grid place-items-center rounded-2xl border border-dashed border-white/10 bg-ink/35 px-6 text-center text-sm font-medium leading-relaxed text-slate-500">
-          위에서 날짜와 체중을 입력하면<br>변화 추이가 여기에 표시됩니다.
+
+      <form id="weightForm" class="rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
+        <div class="mb-5 flex items-center justify-between gap-3">
+          <div>
+            <p id="weightDateLabel" class="text-sm font-extrabold text-white"></p>
+            <p class="mt-1 text-xs text-slate-500">다른 날짜가 아닌 오늘 기록으로 저장됩니다.</p>
+          </div>
+          <span id="weightSaveState" class="rounded-full bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-400">미저장</span>
         </div>
-      </div>
+
+        <label class="block">
+          <span class="mb-2 block text-sm font-extrabold text-white">오늘 체중 (kg)</span>
+          <input id="todayWeightInput" type="number" inputmode="decimal" min="20" max="400" step="0.1" required placeholder="예: 82.4" class="w-full rounded-2xl border border-lime/25 bg-lime/[.07] px-4 py-4 text-2xl font-black text-white outline-none transition placeholder:text-slate-700 focus:border-lime focus:ring-2 focus:ring-lime/10">
+        </label>
+
+        <label class="mt-4 block">
+          <span class="mb-2 block text-sm font-extrabold text-white">오늘의 메모 <span class="font-medium text-slate-500">(선택)</span></span>
+          <textarea id="todayMemo" rows="4" maxlength="240" placeholder="컨디션, 식단, 내일의 나에게 남길 말…" class="w-full resize-none rounded-2xl border border-white/10 bg-ink/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-lime/60 focus:ring-2 focus:ring-lime/10"></textarea>
+        </label>
+
+        <p id="weightFeedback" class="mt-3 min-h-5 text-xs font-bold text-lime" aria-live="polite"></p>
+
+        <div class="mt-2 flex gap-3">
+          <button id="weightEditButton" type="button" class="hidden min-h-12 flex-1 rounded-2xl border border-white/15 bg-white/[.05] px-4 text-sm font-extrabold text-white transition active:scale-[.98]">수정</button>
+          <button id="weightSaveButton" type="submit" class="min-h-12 flex-1 rounded-2xl bg-lime px-4 text-sm font-black text-ink transition active:scale-[.98]">오늘 기록 저장</button>
+        </div>
+      </form>
     </section>
 
-    <section class="mb-4 overflow-hidden rounded-3xl border border-white/10 bg-panel shadow-glow">
-      <div class="p-5">
+    <section data-view="routine" class="hidden">
+      <div class="mb-5">
+        <p class="text-sm font-bold text-lime">WORKOUT</p>
+        <h2 class="mt-1 text-3xl font-black tracking-tight text-white">오늘 운동</h2>
+        <p class="mt-2 text-sm text-slate-400">아침과 저녁 루틴을 하나씩 체크하세요.</p>
+      </div>
+
+      <form id="workoutForm">
+        <section class="mb-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
+          <div class="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-coral">Morning · 15 min</p>
+              <h3 class="text-lg font-extrabold text-white">아침 홈트</h3>
+            </div>
+            <span id="morningStatus" class="rounded-full bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-400">0 / 3</span>
+          </div>
+          <div id="morningList" class="space-y-2"></div>
+        </section>
+
+        <section class="rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
+          <div class="mb-5 flex items-start justify-between gap-3">
+            <div>
+              <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-lime">Evening · 1 hour</p>
+              <h3 id="routineTitle" class="text-xl font-black text-white"></h3>
+              <p id="routineSummary" class="mt-1 text-sm text-slate-400"></p>
+            </div>
+            <span id="weekdayBadge" class="shrink-0 rounded-2xl bg-lime px-3 py-2 text-sm font-black text-ink"></span>
+          </div>
+
+          <div id="routineList" class="space-y-3"></div>
+
+          <div class="mt-5 border-t border-white/10 pt-4">
+            <div class="mb-2 flex items-center justify-between text-xs font-bold">
+              <span class="text-slate-400">저녁 루틴 진행률</span>
+              <span id="routineProgressText" class="text-lime">0 / 0</span>
+            </div>
+            <div class="h-2 overflow-hidden rounded-full bg-white/10">
+              <div id="routineProgressBar" class="h-full w-0 rounded-full bg-lime transition-all duration-500"></div>
+            </div>
+          </div>
+        </section>
+
+        <p id="workoutFeedback" class="mt-3 min-h-5 text-center text-xs font-bold text-lime" aria-live="polite"></p>
+        <div class="flex gap-3">
+          <button id="workoutEditButton" type="button" class="hidden min-h-12 flex-1 rounded-2xl border border-white/15 bg-white/[.05] px-4 text-sm font-extrabold text-white transition active:scale-[.98]">수정</button>
+          <button id="workoutSaveButton" type="submit" class="min-h-12 flex-1 rounded-2xl bg-lime px-4 text-sm font-black text-ink transition active:scale-[.98]">오늘 운동 저장</button>
+        </div>
+      </form>
+    </section>
+
+    <section data-view="settings" class="hidden">
+      <div class="mb-5">
+        <p class="text-sm font-bold text-slate-400">SETTINGS</p>
+        <h2 class="mt-1 text-3xl font-black tracking-tight text-white">내 목표 설정</h2>
+        <p class="mt-2 text-sm text-slate-400">한 번 저장하면 다음부터 다시 입력하지 않아도 됩니다.</p>
+      </div>
+
+      <form id="profileForm" class="rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
         <div class="mb-5 flex items-start justify-between gap-3">
           <div>
-            <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-coral">Morning Mission</p>
-            <h2 class="text-lg font-extrabold text-white">아침 15분 홈트</h2>
-            <p class="mt-1 text-sm text-slate-400">스쿼트 · 푸시업 · AB슬라이드</p>
+            <h3 class="text-lg font-extrabold text-white">기본 정보</h3>
+            <p class="mt-1 text-sm text-slate-400">목표 계산에만 사용됩니다.</p>
           </div>
-          <span id="morningStatus" class="rounded-full bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-400">미완료</span>
+          <span id="profileSaveState" class="rounded-full bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-400">미설정</span>
         </div>
 
-        <label for="morningCheck" class="flex min-h-14 cursor-pointer items-center justify-between rounded-2xl border border-white/10 bg-white/[.035] px-4 transition active:scale-[.99]">
-          <span class="text-sm font-bold text-slate-200">오늘 아침 운동 출석</span>
-          <span class="relative inline-flex items-center">
-            <input id="morningCheck" type="checkbox" class="peer sr-only">
-            <span class="h-7 w-12 rounded-full bg-slate-700 transition peer-checked:bg-lime"></span>
-            <span class="absolute left-1 h-5 w-5 rounded-full bg-white shadow-md transition peer-checked:translate-x-5"></span>
-          </span>
-        </label>
-      </div>
-      <div class="h-1.5 bg-white/5">
-        <div id="morningProgress" class="h-full w-0 bg-gradient-to-r from-coral to-lime transition-all duration-500"></div>
-      </div>
-    </section>
-
-    <section class="mb-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
-      <div class="mb-5 flex items-start justify-between gap-3">
-        <div>
-          <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-lime">Tonight's Routine</p>
-          <h2 id="routineTitle" class="text-xl font-black text-white"></h2>
-          <p id="routineSummary" class="mt-1 text-sm text-slate-400"></p>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="block">
+            <span class="mb-1.5 block text-[11px] font-bold text-slate-500">키 (cm)</span>
+            <input id="heightInput" data-profile="height" type="number" inputmode="decimal" min="100" max="250" step="0.1" required placeholder="예: 170" class="w-full rounded-xl border border-white/10 bg-ink/70 px-3 py-3 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+          </label>
+          <label class="block">
+            <span class="mb-1.5 block text-[11px] font-bold text-slate-500">시작 체중 (kg)</span>
+            <input id="startWeightInput" data-profile="startWeight" type="number" inputmode="decimal" min="20" max="400" step="0.1" required placeholder="예: 85" class="w-full rounded-xl border border-white/10 bg-ink/70 px-3 py-3 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+          </label>
+          <label class="block">
+            <span class="mb-1.5 block text-[11px] font-bold text-slate-500">목표 체중 (kg)</span>
+            <input id="goalWeightInput" data-profile="goalWeight" type="number" inputmode="decimal" min="20" max="400" step="0.1" required placeholder="예: 70" class="w-full rounded-xl border border-white/10 bg-ink/70 px-3 py-3 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+          </label>
+          <label class="block">
+            <span class="mb-1.5 block text-[11px] font-bold text-slate-500">목표 날짜</span>
+            <input id="targetDateInput" data-profile="targetDate" type="date" required class="w-full rounded-xl border border-white/10 bg-ink/70 px-3 py-3 text-sm font-bold text-white outline-none transition focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+          </label>
         </div>
-        <span id="weekdayBadge" class="shrink-0 rounded-2xl bg-lime px-3 py-2 text-sm font-black text-ink"></span>
-      </div>
 
-      <div id="routineList" class="space-y-3"></div>
-
-      <div class="mt-5 border-t border-white/10 pt-4">
-        <div class="mb-2 flex items-center justify-between text-xs font-bold">
-          <span class="text-slate-400">저녁 루틴 진행률</span>
-          <span id="routineProgressText" class="text-lime">0 / 0</span>
+        <div class="mt-4 rounded-2xl bg-white/[.04] px-4 py-3">
+          <p class="text-xs font-bold text-slate-500">현재 BMI</p>
+          <strong id="bmiValue" class="mt-1 block text-xl font-black text-white">—</strong>
+          <p class="mt-1 text-[11px] text-slate-500">최근 저장 체중과 키를 기준으로 자동 계산됩니다.</p>
         </div>
-        <div class="h-2 overflow-hidden rounded-full bg-white/10">
-          <div id="routineProgressBar" class="h-full w-0 rounded-full bg-lime transition-all duration-500"></div>
-        </div>
-      </div>
-    </section>
 
-    <section class="rounded-3xl border border-white/10 bg-panel/75 p-5">
-      <label for="todayMemo" class="mb-2 block text-sm font-extrabold text-white">오늘의 한마디</label>
-      <textarea id="todayMemo" rows="3" maxlength="240" placeholder="컨디션, 식단, 내일의 나에게 남길 말…" class="w-full resize-none rounded-2xl border border-white/10 bg-ink/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-lime/60 focus:ring-2 focus:ring-lime/10"></textarea>
-      <p class="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
-        <span class="inline-block h-1.5 w-1.5 rounded-full bg-lime"></span>
-        모든 기록은 입력 즉시 이 기기의 브라우저에 저장됩니다.
-      </p>
+        <p id="profileFeedback" class="mt-3 min-h-5 text-xs font-bold text-lime" aria-live="polite"></p>
+        <div class="mt-2 flex gap-3">
+          <button id="profileEditButton" type="button" class="hidden min-h-12 flex-1 rounded-2xl border border-white/15 bg-white/[.05] px-4 text-sm font-extrabold text-white transition active:scale-[.98]">수정</button>
+          <button id="profileSaveButton" type="submit" class="min-h-12 flex-1 rounded-2xl bg-lime px-4 text-sm font-black text-ink transition active:scale-[.98]">목표 설정 저장</button>
+        </div>
+      </form>
     </section>
 
     <footer class="py-7 text-center text-xs font-medium text-slate-600">오늘도 어제보다 한 칸 앞으로.</footer>
   </main>
+
+  <nav class="nav-safe fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-ink/95 px-3 pt-2 backdrop-blur-xl" aria-label="주요 메뉴">
+    <div class="mx-auto grid max-w-md grid-cols-4 gap-1">
+      <a href="#dashboard" data-nav="dashboard" class="rounded-2xl px-2 py-2 text-center text-slate-500 transition">
+        <span class="block text-lg" aria-hidden="true">●</span><span class="mt-0.5 block text-[11px] font-extrabold">홈</span>
+      </a>
+      <a href="#today" data-nav="today" class="rounded-2xl px-2 py-2 text-center text-slate-500 transition">
+        <span class="block text-lg" aria-hidden="true">＋</span><span class="mt-0.5 block text-[11px] font-extrabold">오늘 기록</span>
+      </a>
+      <a href="#routine" data-nav="routine" class="rounded-2xl px-2 py-2 text-center text-slate-500 transition">
+        <span class="block text-lg" aria-hidden="true">✓</span><span class="mt-0.5 block text-[11px] font-extrabold">운동</span>
+      </a>
+      <a href="#settings" data-nav="settings" class="rounded-2xl px-2 py-2 text-center text-slate-500 transition">
+        <span class="block text-lg" aria-hidden="true">⚙</span><span class="mt-0.5 block text-[11px] font-extrabold">설정</span>
+      </a>
+    </div>
+  </nav>
 
   <script>
     (() => {
@@ -194,73 +279,38 @@
 
       const STORAGE_KEY = 'd89-diet-tracker-v1';
       const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+      const morningRoutine = [
+        { id: 'squat', name: '스쿼트', detail: '3세트 × 15회' },
+        { id: 'pushup', name: '푸시업', detail: '3세트 × 10회' },
+        { id: 'ab-slide', name: 'AB슬라이드', detail: '3세트 × 10회' }
+      ];
       const routines = {
-        0: {
-          title: '자율 운동 및 휴식',
-          summary: '충분히 회복하고, 몸이 원하면 가볍게 움직여요.',
-          exercises: [
-            { id: 'free', name: '자율 운동', sets: '선택' },
-            { id: 'stretch', name: '스트레칭', sets: '10분' }
-          ]
-        },
-        1: {
-          title: '하체 털기',
-          summary: '하체 근력 45분 + 유산소 15분',
-          exercises: [
-            { id: 'leg-press', name: '레그프레스', sets: '4세트' },
-            { id: 'leg-extension', name: '레그익스텐션', sets: '3세트' },
-            { id: 'leg-curl', name: '레그컬', sets: '3세트' },
-            { id: 'cardio', name: '유산소', sets: '15분' }
-          ]
-        },
-        2: {
-          title: '상체 가슴·등',
-          summary: '밀고 당기는 상체 밸런스 루틴',
-          exercises: [
-            { id: 'lat-pulldown', name: '랫풀다운', sets: '4세트' },
-            { id: 'chest-press', name: '체스트프레스', sets: '4세트' },
-            { id: 'seated-row', name: '시티디로우', sets: '3세트' },
-            { id: 'cardio', name: '유산소', sets: '15분' }
-          ]
-        },
-        3: {
-          title: '하체 & 코어',
-          summary: '하체 중심을 잡고 코어까지 단단하게',
-          exercises: [
-            { id: 'squat', name: '스쿼트', sets: '4세트' },
-            { id: 'leg-press', name: '레그프레스', sets: '3세트' },
-            { id: 'plank', name: '플랭크', sets: '3세트' },
-            { id: 'cardio', name: '유산소', sets: '15분' }
-          ]
-        },
-        4: {
-          title: '상체 어깨·팔',
-          summary: '어깨 라인과 팔을 집중 공략하는 날',
-          exercises: [
-            { id: 'shoulder-press', name: '덤벨숄더프레스', sets: '4세트' },
-            { id: 'lat-pulldown', name: '랫풀다운', sets: '3세트' },
-            { id: 'cable-pushdown', name: '케이블푸시다운', sets: '3세트' },
-            { id: 'cardio', name: '유산소', sets: '15분' }
-          ]
-        },
-        5: {
-          title: '전신 순환',
-          summary: '큰 근육 위주로 주간 루틴을 마무리',
-          exercises: [
-            { id: 'leg-press', name: '레그프레스', sets: '3세트' },
-            { id: 'chest-press', name: '체스트프레스', sets: '3세트' },
-            { id: 'lat-pulldown', name: '랫풀다운', sets: '3세트' },
-            { id: 'cardio', name: '유산소', sets: '20분' }
-          ]
-        },
-        6: {
-          title: '자율 운동 및 휴식',
-          summary: '한 주를 돌아보고 회복에 집중해요.',
-          exercises: [
-            { id: 'free', name: '자율 운동', sets: '선택' },
-            { id: 'stretch', name: '스트레칭', sets: '10분' }
-          ]
-        }
+        0: { title: '자율 운동 및 휴식', summary: '회복을 우선하고 가볍게 움직여요.', exercises: [
+          { id: 'free', name: '자율 운동', sets: '선택' }, { id: 'stretch', name: '스트레칭', sets: '10분' }
+        ]},
+        1: { title: '하체 털기', summary: '하체 근력 45분 + 유산소 15분', exercises: [
+          { id: 'leg-press', name: '레그프레스', sets: '4세트' }, { id: 'leg-extension', name: '레그익스텐션', sets: '3세트' },
+          { id: 'leg-curl', name: '레그컬', sets: '3세트' }, { id: 'cardio', name: '유산소', sets: '15분' }
+        ]},
+        2: { title: '상체 가슴·등', summary: '밀고 당기는 상체 밸런스 루틴', exercises: [
+          { id: 'lat-pulldown', name: '랫풀다운', sets: '4세트' }, { id: 'chest-press', name: '체스트프레스', sets: '4세트' },
+          { id: 'seated-row', name: '시티디로우', sets: '3세트' }, { id: 'cardio', name: '유산소', sets: '15분' }
+        ]},
+        3: { title: '하체 & 코어', summary: '하체 중심을 잡고 코어까지 단단하게', exercises: [
+          { id: 'squat', name: '스쿼트', sets: '4세트' }, { id: 'leg-press', name: '레그프레스', sets: '3세트' },
+          { id: 'plank', name: '플랭크', sets: '3세트' }, { id: 'cardio', name: '유산소', sets: '15분' }
+        ]},
+        4: { title: '상체 어깨·팔', summary: '어깨 라인과 팔을 집중 공략하는 날', exercises: [
+          { id: 'shoulder-press', name: '덤벨숄더프레스', sets: '4세트' }, { id: 'lat-pulldown', name: '랫풀다운', sets: '3세트' },
+          { id: 'cable-pushdown', name: '케이블푸시다운', sets: '3세트' }, { id: 'cardio', name: '유산소', sets: '15분' }
+        ]},
+        5: { title: '전신 순환', summary: '큰 근육 위주로 주간 루틴을 마무리', exercises: [
+          { id: 'leg-press', name: '레그프레스', sets: '3세트' }, { id: 'chest-press', name: '체스트프레스', sets: '3세트' },
+          { id: 'lat-pulldown', name: '랫풀다운', sets: '3세트' }, { id: 'cardio', name: '유산소', sets: '20분' }
+        ]},
+        6: { title: '자율 운동 및 휴식', summary: '한 주를 돌아보고 회복에 집중해요.', exercises: [
+          { id: 'free', name: '자율 운동', sets: '선택' }, { id: 'stretch', name: '스트레칭', sets: '10분' }
+        ]}
       };
 
       const now = new Date();
@@ -268,46 +318,68 @@
       const dateKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
       const weekday = now.getDay();
       const routine = routines[weekday];
+      const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
+      const escapeAttribute = value => String(value ?? '').replace(/[&"'<>]/g, character => ({
+        '&': '&amp;', '"': '&quot;', "'": '&#39;', '<': '&lt;', '>': '&gt;'
+      })[character]);
 
       const readStore = () => {
         try {
-          return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { days: {} };
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          return parsed && typeof parsed === 'object' ? parsed : {};
         } catch {
-          return { days: {} };
+          return {};
         }
       };
 
-      let store = readStore();
-      store.days ||= {};
-      store.profile ||= { height: '', startWeight: '', goalWeight: '', targetDate: '' };
-      store.weights ||= {};
-      store.days[dateKey] ||= { morning: false, exercises: {}, memo: '' };
-      const today = store.days[dateKey];
-      today.exercises ||= {};
+      const store = readStore();
+      store.days = store.days && typeof store.days === 'object' ? store.days : {};
+      store.weights = store.weights && typeof store.weights === 'object' ? store.weights : {};
+      store.profile = store.profile && typeof store.profile === 'object' ? store.profile : {};
+      store.days[dateKey] = store.days[dateKey] && typeof store.days[dateKey] === 'object'
+        ? store.days[dateKey]
+        : { morning: false, exercises: {}, memo: '' };
 
-      const save = () => {
+      const today = store.days[dateKey];
+      today.exercises = today.exercises && typeof today.exercises === 'object' ? today.exercises : {};
+      today.morningExercises = today.morningExercises && typeof today.morningExercises === 'object'
+        ? today.morningExercises
+        : {};
+      if (today.morning === true && !Object.keys(today.morningExercises).length) {
+        morningRoutine.forEach(item => { today.morningExercises[item.id] = true; });
+      }
+
+      const profileComplete = () => ['height', 'startWeight', 'goalWeight', 'targetDate']
+        .every(field => String(store.profile[field] ?? '').trim());
+      if (store.profile.saved === undefined) store.profile.saved = profileComplete();
+      if (today.workoutSaved === undefined) {
+        today.workoutSaved = Boolean(
+          today.morning || Object.keys(today.morningExercises).length || Object.keys(today.exercises).length
+        );
+      }
+
+      const saveStore = () => {
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+          return true;
         } catch (error) {
           console.error('기록을 저장하지 못했습니다.', error);
+          return false;
         }
       };
 
-      document.getElementById('todayLabel').textContent = new Intl.DateTimeFormat('ko-KR', {
+      const fullDate = new Intl.DateTimeFormat('ko-KR', {
         year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
       }).format(now);
+      document.getElementById('todayLabel').textContent = fullDate;
+      document.getElementById('weightDateLabel').textContent = fullDate;
       document.getElementById('routineTitle').textContent = routine.title;
       document.getElementById('routineSummary').textContent = routine.summary;
       document.getElementById('weekdayBadge').textContent = `${dayNames[weekday]}요일`;
 
-      const profileInputs = document.querySelectorAll('[data-profile]');
-      const weightDateInput = document.getElementById('weightDateInput');
-      const weightEntryInput = document.getElementById('weightEntryInput');
-      let weightChart = null;
-
       const getWeightEntries = () => Object.entries(store.weights)
         .map(([date, weight]) => ({ date, weight: Number(weight) }))
-        .filter(entry => Number.isFinite(entry.weight) && entry.weight > 0)
+        .filter(entry => /^\d{4}-\d{2}-\d{2}$/.test(entry.date) && Number.isFinite(entry.weight) && entry.weight > 0)
         .sort((a, b) => a.date.localeCompare(b.date));
 
       const getDday = targetDate => {
@@ -320,17 +392,19 @@
         return difference > 0 ? `D-${difference}` : `D+${Math.abs(difference)}`;
       };
 
+      let weightChart = null;
       const renderWeightChart = entries => {
         const empty = document.getElementById('chartEmpty');
-        empty.classList.toggle('hidden', entries.length > 0);
-
         if (!entries.length || typeof Chart === 'undefined') {
+          empty.classList.remove('hidden');
+          if (typeof Chart === 'undefined' && entries.length) empty.textContent = '그래프를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.';
           if (weightChart) {
             weightChart.destroy();
             weightChart = null;
           }
           return;
         }
+        empty.classList.add('hidden');
 
         const goalWeight = Number(store.profile.goalWeight);
         const hasGoal = Number.isFinite(goalWeight) && goalWeight > 0;
@@ -338,28 +412,14 @@
           labels: entries.map(entry => entry.date.slice(5).replace('-', '.')),
           datasets: [
             {
-              label: '체중',
-              data: entries.map(entry => entry.weight),
-              borderColor: '#c6ff4a',
-              backgroundColor: 'rgba(198, 255, 74, .14)',
-              pointBackgroundColor: '#c6ff4a',
-              pointBorderColor: '#07111f',
-              pointBorderWidth: 2,
-              pointRadius: 4,
-              pointHoverRadius: 6,
-              borderWidth: 2.5,
-              tension: .32,
-              fill: true
+              label: '체중', data: entries.map(entry => entry.weight), borderColor: '#c6ff4a',
+              backgroundColor: 'rgba(198,255,74,.14)', pointBackgroundColor: '#c6ff4a',
+              pointBorderColor: '#07111f', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6,
+              borderWidth: 2.5, tension: .32, fill: true
             },
             ...(hasGoal ? [{
-              label: `목표 ${goalWeight}kg`,
-              data: entries.map(() => goalWeight),
-              borderColor: '#ff725e',
-              borderWidth: 1.5,
-              borderDash: [5, 5],
-              pointRadius: 0,
-              pointHoverRadius: 0,
-              fill: false
+              label: `목표 ${goalWeight}kg`, data: entries.map(() => goalWeight), borderColor: '#ff725e',
+              borderWidth: 1.5, borderDash: [5, 5], pointRadius: 0, pointHoverRadius: 0, fill: false
             }] : [])
           ]
         };
@@ -372,50 +432,30 @@
         }
 
         weightChart = new Chart(document.getElementById('weightChart'), {
-          type: 'line',
-          data,
+          type: 'line', data,
           options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: 'index', intersect: false },
+            responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
             animation: { duration: 350 },
             plugins: {
-              legend: {
-                display: hasGoal,
-                labels: { color: '#94a3b8', boxWidth: 12, boxHeight: 2, usePointStyle: true }
-              },
+              legend: { display: hasGoal, labels: { color: '#94a3b8', boxWidth: 12, boxHeight: 2, usePointStyle: true } },
               tooltip: {
-                backgroundColor: '#07111f',
-                titleColor: '#f8fafc',
-                bodyColor: '#cbd5e1',
-                borderColor: 'rgba(255,255,255,.12)',
-                borderWidth: 1,
+                backgroundColor: '#07111f', titleColor: '#f8fafc', bodyColor: '#cbd5e1',
+                borderColor: 'rgba(255,255,255,.12)', borderWidth: 1,
                 callbacks: { label: context => `${context.dataset.label}: ${context.parsed.y}kg` }
               }
             },
             scales: {
-              x: {
-                grid: { display: false },
-                ticks: { color: '#64748b', maxTicksLimit: 5, maxRotation: 0 },
-                border: { color: 'rgba(255,255,255,.08)' }
-              },
-              y: {
-                grace: '8%',
-                title: { display: true, text: 'kg', color: '#64748b' },
-                grid: { color: 'rgba(255,255,255,.06)' },
-                ticks: { color: '#64748b' },
-                border: { display: false }
-              }
+              x: { grid: { display: false }, ticks: { color: '#64748b', maxTicksLimit: 5, maxRotation: 0 }, border: { color: 'rgba(255,255,255,.08)' } },
+              y: { grace: '8%', title: { display: true, text: 'kg', color: '#64748b' }, grid: { color: 'rgba(255,255,255,.06)' }, ticks: { color: '#64748b' }, border: { display: false } }
             }
           }
         });
       };
 
-      const renderBodyDashboard = () => {
+      const renderDashboard = () => {
         const entries = getWeightEntries();
-        const latest = entries.at(-1)?.weight;
-        const first = entries[0]?.weight;
-        const height = Number(store.profile.height);
+        const latest = entries.length ? entries[entries.length - 1].weight : null;
+        const first = entries.length ? entries[0].weight : null;
         const startWeight = Number(store.profile.startWeight);
         const goalWeight = Number(store.profile.goalWeight);
         const hasLatest = Number.isFinite(latest);
@@ -423,89 +463,153 @@
 
         document.getElementById('projectDay').textContent = getDday(store.profile.targetDate);
         document.getElementById('currentWeightStat').textContent = hasLatest ? `${latest.toFixed(1)}kg` : '—';
-
         const remaining = hasLatest && hasGoal ? latest - goalWeight : null;
-        document.getElementById('remainingWeightStat').textContent = remaining === null
-          ? '—'
-          : remaining <= 0 ? '달성!' : `${remaining.toFixed(1)}kg`;
+        document.getElementById('remainingWeightStat').textContent = remaining === null ? '—' : remaining <= 0 ? '달성!' : `${remaining.toFixed(1)}kg`;
 
-        const canCalculateProgress = hasLatest && hasGoal && Number.isFinite(startWeight) && startWeight !== goalWeight;
-        const progress = canCalculateProgress
+        const canProgress = hasLatest && hasGoal && Number.isFinite(startWeight) && startWeight !== goalWeight;
+        const progress = canProgress
           ? Math.max(0, Math.min(100, ((startWeight - latest) / (startWeight - goalWeight)) * 100))
           : null;
         document.getElementById('goalProgressStat').textContent = progress === null ? '—' : `${Math.round(progress)}%`;
-
-        const bmi = hasLatest && Number.isFinite(height) && height > 0
-          ? latest / ((height / 100) ** 2)
-          : null;
-        document.getElementById('bmiBadge').textContent = bmi ? `BMI ${bmi.toFixed(1)}` : 'BMI —';
+        document.getElementById('goalProgressText').textContent = progress === null ? '설정 필요' : `${Math.round(progress)}%`;
+        document.getElementById('goalProgressBar').style.width = progress === null ? '0%' : `${progress}%`;
 
         const changeLabel = document.getElementById('weightChangeLabel');
         if (entries.length < 2) {
-          changeLabel.textContent = entries.length ? '첫 체중 기록 완료' : '기록을 시작해 보세요';
+          changeLabel.textContent = entries.length ? '첫 기록 완료' : '기록 없음';
           changeLabel.className = 'text-xs font-bold text-slate-400';
         } else {
           const change = latest - first;
-          changeLabel.textContent = change === 0
-            ? '첫 기록과 동일'
-            : `${Math.abs(change).toFixed(1)}kg ${change < 0 ? '감량' : '증가'}`;
-          changeLabel.className = change <= 0
-            ? 'text-xs font-bold text-lime'
-            : 'text-xs font-bold text-coral';
+          changeLabel.textContent = change === 0 ? '첫 기록과 동일' : `${Math.abs(change).toFixed(1)}kg ${change < 0 ? '감량' : '증가'}`;
+          changeLabel.className = change <= 0 ? 'text-xs font-bold text-lime' : 'text-xs font-bold text-coral';
         }
 
+        document.getElementById('todayWeightStatus').textContent = hasOwn(store.weights, dateKey)
+          ? `${Number(store.weights[dateKey]).toFixed(1)}kg 저장됨`
+          : '기록하기';
+        const morningDone = morningRoutine.filter(item => today.morningExercises[item.id]).length;
+        const eveningDone = routine.exercises.filter(item => today.exercises[item.id]?.done).length;
+        document.getElementById('todayWorkoutStatus').textContent = today.workoutSaved
+          ? `아침 ${morningDone}/3 · 저녁 ${eveningDone}/${routine.exercises.length}`
+          : '기록하기';
+
+        const height = Number(store.profile.height);
+        const bmi = hasLatest && Number.isFinite(height) && height > 0 ? latest / ((height / 100) ** 2) : null;
+        document.getElementById('bmiValue').textContent = bmi ? `BMI ${bmi.toFixed(1)}` : '—';
         renderWeightChart(entries);
       };
 
-      profileInputs.forEach(input => {
-        const field = input.dataset.profile;
-        input.value = store.profile[field] || '';
-        input.addEventListener('input', event => {
-          store.profile[field] = event.target.value;
-          save();
-          renderBodyDashboard();
-        });
-      });
+      const profileInputs = Array.from(document.querySelectorAll('[data-profile]'));
+      profileInputs.forEach(input => { input.value = store.profile[input.dataset.profile] ?? ''; });
+      const profileForm = document.getElementById('profileForm');
+      const profileEditButton = document.getElementById('profileEditButton');
+      const profileSaveButton = document.getElementById('profileSaveButton');
+      const profileSaveState = document.getElementById('profileSaveState');
+      const profileFeedback = document.getElementById('profileFeedback');
 
-      weightDateInput.value = dateKey;
-      weightEntryInput.value = store.weights[dateKey] ?? '';
-      weightDateInput.addEventListener('change', event => {
-        weightEntryInput.value = store.weights[event.target.value] ?? '';
-      });
-      weightEntryInput.addEventListener('input', event => {
-        const selectedDate = weightDateInput.value || dateKey;
-        const value = event.target.value;
-        if (value === '') {
-          delete store.weights[selectedDate];
-        } else {
-          store.weights[selectedDate] = Number(value);
-        }
-        save();
-        renderBodyDashboard();
-      });
-
-      const morningCheck = document.getElementById('morningCheck');
-      const morningStatus = document.getElementById('morningStatus');
-      const morningProgress = document.getElementById('morningProgress');
-
-      const paintMorning = () => {
-        morningStatus.textContent = today.morning ? '완료 ✓' : '미완료';
-        morningStatus.className = today.morning
-          ? 'rounded-full bg-lime/15 px-3 py-1.5 text-xs font-bold text-lime'
-          : 'rounded-full bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-400';
-        morningProgress.style.width = today.morning ? '100%' : '0%';
+      const setProfileMode = editing => {
+        profileInputs.forEach(input => { input.disabled = !editing; });
+        profileSaveButton.classList.toggle('hidden', !editing);
+        profileEditButton.classList.toggle('hidden', editing);
+        profileSaveState.textContent = editing ? '수정 중' : '저장됨';
+        profileSaveState.className = editing
+          ? 'rounded-full bg-coral/10 px-3 py-1.5 text-xs font-bold text-coral'
+          : 'rounded-full bg-lime/15 px-3 py-1.5 text-xs font-bold text-lime';
       };
 
-      morningCheck.checked = Boolean(today.morning);
-      paintMorning();
-      morningCheck.addEventListener('change', event => {
-        today.morning = event.target.checked;
-        save();
-        paintMorning();
+      const profileIsSaved = Boolean(store.profile.saved && profileComplete());
+      setProfileMode(!profileIsSaved);
+      if (!profileIsSaved) {
+        profileSaveState.textContent = '미설정';
+        profileSaveState.className = 'rounded-full bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-400';
+      }
+
+      profileEditButton.addEventListener('click', () => {
+        profileFeedback.textContent = '';
+        setProfileMode(true);
+        profileInputs[0].focus();
       });
 
-      const list = document.getElementById('routineList');
-      list.innerHTML = routine.exercises.map((exercise, index) => {
+      profileForm.addEventListener('submit', event => {
+        event.preventDefault();
+        if (!profileForm.reportValidity()) return;
+        const nextProfile = {};
+        profileInputs.forEach(input => { nextProfile[input.dataset.profile] = input.value; });
+        store.profile = { ...store.profile, ...nextProfile, saved: true };
+        if (!saveStore()) {
+          profileFeedback.textContent = '저장하지 못했습니다. 브라우저 저장 공간을 확인해 주세요.';
+          return;
+        }
+        profileFeedback.textContent = '목표 설정을 저장했습니다.';
+        setProfileMode(false);
+        renderDashboard();
+      });
+
+      const weightForm = document.getElementById('weightForm');
+      const todayWeightInput = document.getElementById('todayWeightInput');
+      const todayMemo = document.getElementById('todayMemo');
+      const weightEditButton = document.getElementById('weightEditButton');
+      const weightSaveButton = document.getElementById('weightSaveButton');
+      const weightSaveState = document.getElementById('weightSaveState');
+      const weightFeedback = document.getElementById('weightFeedback');
+      todayWeightInput.value = hasOwn(store.weights, dateKey) ? store.weights[dateKey] : '';
+      todayMemo.value = today.memo || '';
+
+      const setWeightMode = editing => {
+        todayWeightInput.disabled = !editing;
+        todayMemo.disabled = !editing;
+        weightSaveButton.classList.toggle('hidden', !editing);
+        weightEditButton.classList.toggle('hidden', editing);
+        weightSaveState.textContent = editing ? '작성 중' : '저장됨';
+        weightSaveState.className = editing
+          ? 'rounded-full bg-coral/10 px-3 py-1.5 text-xs font-bold text-coral'
+          : 'rounded-full bg-lime/15 px-3 py-1.5 text-xs font-bold text-lime';
+      };
+
+      const weightIsSaved = hasOwn(store.weights, dateKey);
+      setWeightMode(!weightIsSaved);
+      if (!weightIsSaved) {
+        weightSaveState.textContent = '미저장';
+        weightSaveState.className = 'rounded-full bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-400';
+      }
+
+      weightEditButton.addEventListener('click', () => {
+        weightFeedback.textContent = '';
+        setWeightMode(true);
+        todayWeightInput.focus();
+      });
+
+      weightForm.addEventListener('submit', event => {
+        event.preventDefault();
+        if (!weightForm.reportValidity()) return;
+        const weight = Number(todayWeightInput.value);
+        if (!Number.isFinite(weight) || weight <= 0) return;
+        store.weights[dateKey] = weight;
+        today.memo = todayMemo.value.trim();
+        if (!saveStore()) {
+          weightFeedback.textContent = '저장하지 못했습니다. 브라우저 저장 공간을 확인해 주세요.';
+          return;
+        }
+        weightFeedback.textContent = '오늘 기록을 저장했습니다.';
+        setWeightMode(false);
+        renderDashboard();
+      });
+
+      const morningList = document.getElementById('morningList');
+      morningList.innerHTML = morningRoutine.map((item, index) => `
+        <label class="flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-ink/55 px-4 transition active:scale-[.99]">
+          <input type="checkbox" data-morning-id="${item.id}" ${today.morningExercises[item.id] ? 'checked' : ''} class="h-5 w-5 shrink-0 rounded accent-lime">
+          <span class="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white/[.06] text-xs font-black text-slate-400">${index + 1}</span>
+          <span class="min-w-0 flex-1">
+            <strong class="block text-sm font-extrabold text-white">${item.name}</strong>
+            <span class="text-xs font-bold text-coral">${item.detail}</span>
+          </span>
+          <span class="text-xs font-bold text-slate-500">완료</span>
+        </label>
+      `).join('');
+
+      const routineList = document.getElementById('routineList');
+      routineList.innerHTML = routine.exercises.map((exercise, index) => {
         const saved = today.exercises[exercise.id] || {};
         const isCardio = exercise.id === 'cardio';
         const firstLabel = isCardio ? '속도/강도' : '무게 (kg)';
@@ -516,58 +620,113 @@
               <div class="flex min-w-0 items-center gap-3">
                 <span class="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white/[.06] text-xs font-black text-slate-400">${String(index + 1).padStart(2, '0')}</span>
                 <div class="min-w-0">
-                  <h3 class="truncate text-sm font-extrabold text-white">${exercise.name}</h3>
+                  <h4 class="truncate text-sm font-extrabold text-white">${exercise.name}</h4>
                   <p class="text-xs font-semibold text-lime/80">${exercise.sets}</p>
                 </div>
               </div>
               <label class="flex cursor-pointer items-center gap-2 text-xs font-bold text-slate-500">
                 완료
-                <input type="checkbox" data-field="done" ${saved.done ? 'checked' : ''} class="h-5 w-5 rounded border-slate-600 bg-ink text-lime accent-lime">
+                <input type="checkbox" data-field="done" ${saved.done ? 'checked' : ''} class="h-5 w-5 rounded accent-lime">
               </label>
             </div>
             <div class="grid grid-cols-2 gap-2">
               <label class="block">
                 <span class="mb-1.5 block text-[11px] font-bold text-slate-500">${firstLabel}</span>
-                <input type="number" inputmode="decimal" min="0" step="0.5" data-field="weight" value="${saved.weight ?? ''}" placeholder="0" aria-label="${exercise.name} ${firstLabel}" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+                <input type="number" inputmode="decimal" min="0" step="0.5" data-field="weight" value="${escapeAttribute(saved.weight)}" placeholder="0" aria-label="${exercise.name} ${firstLabel}" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
               </label>
               <label class="block">
                 <span class="mb-1.5 block text-[11px] font-bold text-slate-500">${secondLabel}</span>
-                <input type="number" inputmode="numeric" min="0" step="1" data-field="reps" value="${saved.reps ?? ''}" placeholder="0" aria-label="${exercise.name} ${secondLabel}" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+                <input type="number" inputmode="numeric" min="0" step="1" data-field="reps" value="${escapeAttribute(saved.reps)}" placeholder="0" aria-label="${exercise.name} ${secondLabel}" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-700 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
               </label>
             </div>
           </article>
         `;
       }).join('');
 
-      const paintRoutineProgress = () => {
-        const completed = routine.exercises.filter(exercise => today.exercises[exercise.id]?.done).length;
-        const total = routine.exercises.length;
-        document.getElementById('routineProgressText').textContent = `${completed} / ${total}`;
-        document.getElementById('routineProgressBar').style.width = total ? `${(completed / total) * 100}%` : '0%';
+      const workoutForm = document.getElementById('workoutForm');
+      const workoutEditButton = document.getElementById('workoutEditButton');
+      const workoutSaveButton = document.getElementById('workoutSaveButton');
+      const workoutFeedback = document.getElementById('workoutFeedback');
+      const workoutFields = Array.from(workoutForm.querySelectorAll('input'));
+
+      const paintWorkoutDraft = () => {
+        const morningChecked = workoutForm.querySelectorAll('[data-morning-id]:checked').length;
+        const morningStatus = document.getElementById('morningStatus');
+        morningStatus.textContent = morningChecked === morningRoutine.length ? '완료 ✓' : `${morningChecked} / ${morningRoutine.length}`;
+        morningStatus.className = morningChecked === morningRoutine.length
+          ? 'rounded-full bg-lime/15 px-3 py-1.5 text-xs font-bold text-lime'
+          : 'rounded-full bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-400';
+
+        const eveningChecked = workoutForm.querySelectorAll('[data-exercise] [data-field="done"]:checked').length;
+        document.getElementById('routineProgressText').textContent = `${eveningChecked} / ${routine.exercises.length}`;
+        document.getElementById('routineProgressBar').style.width = `${(eveningChecked / routine.exercises.length) * 100}%`;
       };
 
-      list.addEventListener('input', event => {
-        const card = event.target.closest('[data-exercise]');
-        const field = event.target.dataset.field;
-        if (!card || !field) return;
+      const setWorkoutMode = editing => {
+        workoutFields.forEach(input => { input.disabled = !editing; });
+        workoutSaveButton.classList.toggle('hidden', !editing);
+        workoutEditButton.classList.toggle('hidden', editing);
+      };
 
-        const id = card.dataset.exercise;
-        today.exercises[id] ||= {};
-        today.exercises[id][field] = field === 'done' ? event.target.checked : event.target.value;
-        save();
-        if (field === 'done') paintRoutineProgress();
+      setWorkoutMode(!today.workoutSaved);
+      paintWorkoutDraft();
+      workoutForm.addEventListener('input', paintWorkoutDraft);
+      workoutEditButton.addEventListener('click', () => {
+        workoutFeedback.textContent = '';
+        setWorkoutMode(true);
       });
 
-      const memo = document.getElementById('todayMemo');
-      memo.value = today.memo || '';
-      memo.addEventListener('input', event => {
-        today.memo = event.target.value;
-        save();
+      workoutForm.addEventListener('submit', event => {
+        event.preventDefault();
+        const morningValues = {};
+        workoutForm.querySelectorAll('[data-morning-id]').forEach(input => {
+          morningValues[input.dataset.morningId] = input.checked;
+        });
+        const exerciseValues = {};
+        routineList.querySelectorAll('[data-exercise]').forEach(card => {
+          const id = card.dataset.exercise;
+          exerciseValues[id] = {
+            done: card.querySelector('[data-field="done"]').checked,
+            weight: card.querySelector('[data-field="weight"]').value,
+            reps: card.querySelector('[data-field="reps"]').value
+          };
+        });
+        today.morningExercises = morningValues;
+        today.morning = morningRoutine.every(item => morningValues[item.id]);
+        today.exercises = exerciseValues;
+        today.workoutSaved = true;
+        if (!saveStore()) {
+          workoutFeedback.textContent = '저장하지 못했습니다. 브라우저 저장 공간을 확인해 주세요.';
+          return;
+        }
+        workoutFeedback.textContent = '오늘 운동 기록을 저장했습니다.';
+        setWorkoutMode(false);
+        paintWorkoutDraft();
+        renderDashboard();
       });
 
-      paintRoutineProgress();
-      renderBodyDashboard();
-      save();
+      const validViews = ['dashboard', 'today', 'routine', 'settings'];
+      const showView = () => {
+        let view = location.hash.replace('#', '') || 'dashboard';
+        if (!validViews.includes(view)) view = 'dashboard';
+        document.querySelectorAll('[data-view]').forEach(section => {
+          section.classList.toggle('hidden', section.dataset.view !== view);
+        });
+        document.querySelectorAll('[data-nav]').forEach(link => {
+          const active = link.dataset.nav === view;
+          link.classList.toggle('bg-white/[.06]', active);
+          link.classList.toggle('text-lime', active);
+          link.classList.toggle('text-slate-500', !active);
+          if (active) link.setAttribute('aria-current', 'page');
+          else link.removeAttribute('aria-current');
+        });
+        window.scrollTo(0, 0);
+      };
+
+      window.addEventListener('hashchange', showView);
+      renderDashboard();
+      if (!profileIsSaved && !location.hash) location.hash = 'settings';
+      else showView();
     })();
   </script>
 </body>
