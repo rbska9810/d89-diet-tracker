@@ -207,11 +207,49 @@
     <section data-view="history" class="hidden">
       <div class="mb-5">
         <p class="text-sm font-bold text-sky-400">HISTORY</p>
-        <h2 class="mt-1 text-3xl font-black tracking-tight text-white">주간 기록</h2>
-        <p class="mt-2 text-sm text-slate-400">일주일의 체중과 운동 출석을 확인하세요.</p>
+        <h2 class="mt-1 text-3xl font-black tracking-tight text-white">운동 기록</h2>
+        <p class="mt-2 text-sm text-slate-400">출석 달력과 운동별 중량 변화를 확인하세요.</p>
       </div>
 
+      <section class="mb-4 grid grid-cols-2 gap-3">
+        <div class="rounded-3xl border border-coral/20 bg-coral/10 p-4 shadow-glow">
+          <p class="text-xs font-bold text-coral">현재 연속 출석</p>
+          <strong id="currentStreakStat" class="mt-2 block text-3xl font-black text-white">0일</strong>
+          <span class="mt-1 block text-[11px] font-bold text-slate-400">오늘 또는 어제부터 계산</span>
+        </div>
+        <div class="rounded-3xl border border-lime/20 bg-lime/10 p-4 shadow-glow">
+          <p id="monthAttendanceLabel" class="text-xs font-bold text-lime">이번 달 출석</p>
+          <strong id="monthAttendanceStat" class="mt-2 block text-3xl font-black text-white">0일</strong>
+          <span id="monthRateText" class="mt-1 block text-[11px] font-bold text-slate-400">운동한 날 기준</span>
+        </div>
+      </section>
+
       <section class="mb-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
+        <div class="mb-4 flex items-center justify-between gap-2">
+          <button id="previousMonthButton" type="button" class="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[.04] text-lg font-black text-white transition active:scale-95" aria-label="이전 달">‹</button>
+          <div class="text-center">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Attendance Calendar</p>
+            <strong id="monthLabel" class="mt-1 block text-base font-extrabold text-white"></strong>
+          </div>
+          <button id="nextMonthButton" type="button" class="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[.04] text-lg font-black text-white transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-30" aria-label="다음 달">›</button>
+        </div>
+        <button id="currentMonthButton" type="button" class="mb-4 min-h-10 w-full rounded-xl bg-white/[.05] text-xs font-extrabold text-slate-300 transition active:scale-[.99]">이번 달로 돌아가기</button>
+        <div class="mb-2 grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-500">
+          <span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span>
+        </div>
+        <div id="monthCalendar" class="grid grid-cols-7 gap-1"></div>
+        <div class="mt-4 flex flex-wrap justify-center gap-3 text-[10px] font-bold text-slate-500">
+          <span class="flex items-center gap-1"><i class="h-2 w-2 rounded-full bg-coral"></i>아침</span>
+          <span class="flex items-center gap-1"><i class="h-2 w-2 rounded-full bg-lime"></i>저녁</span>
+          <span class="flex items-center gap-1"><i class="h-2 w-2 rounded-full bg-sky-400"></i>체중</span>
+        </div>
+      </section>
+
+      <section class="mb-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
+        <div class="mb-4">
+          <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-sky-400">Weekly Check</p>
+          <h3 class="text-lg font-extrabold text-white">주간 상세</h3>
+        </div>
         <div class="mb-4 flex items-center justify-between gap-2">
           <button id="previousWeekButton" type="button" class="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[.04] text-lg font-black text-white transition active:scale-95" aria-label="이전 주">‹</button>
           <div class="text-center">
@@ -229,6 +267,28 @@
         </div>
 
         <div id="historyList" class="space-y-2"></div>
+      </section>
+
+      <section class="rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
+        <div class="mb-4">
+          <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-lime">Strength Progress</p>
+          <h3 class="text-lg font-extrabold text-white">운동별 중량 변화</h3>
+          <p class="mt-1 text-sm text-slate-400">저녁 운동에서 저장한 무게를 기준으로 표시합니다.</p>
+        </div>
+        <label class="block">
+          <span class="mb-1.5 block text-[11px] font-bold text-slate-500">운동 선택</span>
+          <select id="exerciseSelect" class="w-full rounded-xl border border-white/10 bg-ink/70 px-3 py-3 text-sm font-extrabold text-white outline-none transition focus:border-lime/60 focus:ring-2 focus:ring-lime/10"></select>
+        </label>
+        <div class="mt-4 flex items-end justify-between gap-3">
+          <span class="text-xs font-bold text-slate-500">저장 날짜별 중량</span>
+          <strong id="exerciseChangeLabel" class="text-xs font-bold text-slate-400">기록 없음</strong>
+        </div>
+        <div class="relative mt-3 h-52 w-full">
+          <canvas id="exerciseChart" role="img" aria-label="운동별 중량 변화 그래프">운동별 중량 변화 그래프</canvas>
+          <div id="exerciseChartEmpty" class="absolute inset-0 grid place-items-center rounded-2xl border border-dashed border-white/10 bg-ink/35 px-6 text-center text-sm font-medium leading-relaxed text-slate-500">
+            선택한 운동의 무게 기록이 쌓이면<br>변화 추이가 표시됩니다.
+          </div>
+        </div>
       </section>
     </section>
 
@@ -358,6 +418,13 @@
           { id: 'free', name: '자율 운동', sets: '선택' }, { id: 'stretch', name: '스트레칭', sets: '10분' }
         ]}
       };
+      const excludedChartExercises = new Set(['cardio', 'free', 'stretch']);
+      const exerciseCatalog = Array.from(new Map(
+        Object.values(routines)
+          .flatMap(day => day.exercises)
+          .filter(exercise => !excludedChartExercises.has(exercise.id))
+          .map(exercise => [exercise.id, { id: exercise.id, name: exercise.name }])
+      ).values());
 
       const now = new Date();
       const pad = value => String(value).padStart(2, '0');
@@ -758,6 +825,103 @@
         return monday;
       };
       let historyWeekOffset = 0;
+      let monthCursor = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const getDaySnapshot = date => {
+        const key = formatDateKey(date);
+        const dayData = store.days[key] || {};
+        const morningValues = dayData.morningExercises || {};
+        const morningCount = dayData.morning === true
+          ? morningRoutine.length
+          : morningRoutine.filter(item => morningValues[item.id]).length;
+        const dayRoutine = routines[date.getDay()];
+        const dayExercises = dayData.exercises || {};
+        const eveningCount = dayRoutine.exercises.filter(item => dayExercises[item.id]?.done).length;
+        const hasWeight = hasOwn(store.weights, key) && Number.isFinite(Number(store.weights[key]));
+        return {
+          key,
+          morningCount,
+          morningComplete: morningCount === morningRoutine.length,
+          eveningCount,
+          eveningTotal: dayRoutine.exercises.length,
+          eveningComplete: eveningCount === dayRoutine.exercises.length,
+          hasWeight,
+          attended: morningCount > 0 || eveningCount > 0
+        };
+      };
+
+      const calculateCurrentStreak = () => {
+        const cursor = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        if (!getDaySnapshot(cursor).attended) cursor.setDate(cursor.getDate() - 1);
+        let streak = 0;
+        while (streak < 3650 && getDaySnapshot(cursor).attended) {
+          streak += 1;
+          cursor.setDate(cursor.getDate() - 1);
+        }
+        return streak;
+      };
+
+      const renderMonthCalendar = () => {
+        const year = monthCursor.getFullYear();
+        const month = monthCursor.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const leadingBlanks = (firstDay.getDay() + 6) % 7;
+        const totalCells = Math.ceil((leadingBlanks + daysInMonth) / 7) * 7;
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const isCurrentMonth = year === now.getFullYear() && month === now.getMonth();
+        let attendanceDays = 0;
+
+        const cells = Array.from({ length: totalCells }, (_, index) => {
+          const dayNumber = index - leadingBlanks + 1;
+          if (dayNumber < 1 || dayNumber > daysInMonth) return '<div class="min-h-14"></div>';
+          const date = new Date(year, month, dayNumber);
+          const snapshot = getDaySnapshot(date);
+          const isToday = snapshot.key === dateKey;
+          const isFuture = date > todayStart;
+          if (snapshot.attended && !isFuture) attendanceDays += 1;
+          const morningDot = snapshot.morningCount
+            ? `<i class="h-1.5 w-1.5 rounded-full ${snapshot.morningComplete ? 'bg-coral' : 'bg-coral/35'}"></i>`
+            : '';
+          const eveningDot = snapshot.eveningCount
+            ? `<i class="h-1.5 w-1.5 rounded-full ${snapshot.eveningComplete ? 'bg-lime' : 'bg-lime/35'}"></i>`
+            : '';
+          const weightDot = snapshot.hasWeight ? '<i class="h-1.5 w-1.5 rounded-full bg-sky-400"></i>' : '';
+          const aria = `${month + 1}월 ${dayNumber}일, 아침 ${snapshot.morningCount}/${morningRoutine.length}, 저녁 ${snapshot.eveningCount}/${snapshot.eveningTotal}${snapshot.hasWeight ? ', 체중 기록 있음' : ''}`;
+          return `
+            <div aria-label="${aria}" class="flex min-h-14 flex-col items-center justify-center rounded-xl border ${isToday ? 'border-lime/40 bg-lime/[.08]' : 'border-white/[.06] bg-ink/35'} ${isFuture ? 'opacity-30' : ''}">
+              <strong class="text-xs font-black ${isToday ? 'text-lime' : 'text-slate-300'}">${dayNumber}</strong>
+              <span class="mt-2 flex min-h-1.5 gap-1">${morningDot}${eveningDot}${weightDot}</span>
+            </div>
+          `;
+        }).join('');
+
+        const elapsedDays = isCurrentMonth ? now.getDate() : daysInMonth;
+        const attendanceRate = elapsedDays ? Math.round((attendanceDays / elapsedDays) * 100) : 0;
+        document.getElementById('monthLabel').textContent = `${year}년 ${month + 1}월`;
+        document.getElementById('monthAttendanceLabel').textContent = `${month + 1}월 출석`;
+        document.getElementById('monthAttendanceStat').textContent = `${attendanceDays}일`;
+        document.getElementById('monthRateText').textContent = `${elapsedDays}일 중 ${attendanceRate}%`;
+        document.getElementById('currentStreakStat').textContent = `${calculateCurrentStreak()}일`;
+        document.getElementById('monthCalendar').innerHTML = cells;
+        document.getElementById('nextMonthButton').disabled = isCurrentMonth;
+        document.getElementById('currentMonthButton').classList.toggle('hidden', isCurrentMonth);
+      };
+
+      document.getElementById('previousMonthButton').addEventListener('click', () => {
+        monthCursor = new Date(monthCursor.getFullYear(), monthCursor.getMonth() - 1, 1);
+        renderMonthCalendar();
+      });
+      document.getElementById('nextMonthButton').addEventListener('click', () => {
+        const next = new Date(monthCursor.getFullYear(), monthCursor.getMonth() + 1, 1);
+        const current = new Date(now.getFullYear(), now.getMonth(), 1);
+        if (next <= current) monthCursor = next;
+        renderMonthCalendar();
+      });
+      document.getElementById('currentMonthButton').addEventListener('click', () => {
+        monthCursor = new Date(now.getFullYear(), now.getMonth(), 1);
+        renderMonthCalendar();
+      });
 
       const renderHistory = () => {
         const monday = startOfWeek(now);
@@ -835,6 +999,102 @@
         renderHistory();
       });
 
+      const exerciseSelect = document.getElementById('exerciseSelect');
+      exerciseSelect.innerHTML = exerciseCatalog
+        .map(exercise => `<option value="${exercise.id}">${exercise.name}</option>`)
+        .join('');
+
+      const getExerciseEntries = exerciseId => Object.entries(store.days)
+        .map(([date, dayData]) => ({
+          date,
+          weight: Number(dayData?.exercises?.[exerciseId]?.weight)
+        }))
+        .filter(entry => /^\d{4}-\d{2}-\d{2}$/.test(entry.date) && Number.isFinite(entry.weight) && entry.weight > 0)
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      const firstExerciseWithData = exerciseCatalog.find(exercise => getExerciseEntries(exercise.id).length);
+      exerciseSelect.value = firstExerciseWithData?.id || exerciseCatalog[0]?.id || '';
+      let exerciseChart = null;
+
+      const renderExerciseChart = () => {
+        const selectedId = exerciseSelect.value;
+        const selected = exerciseCatalog.find(exercise => exercise.id === selectedId);
+        const entries = getExerciseEntries(selectedId);
+        const empty = document.getElementById('exerciseChartEmpty');
+        const changeLabel = document.getElementById('exerciseChangeLabel');
+
+        if (entries.length < 2) {
+          changeLabel.textContent = entries.length ? `첫 기록 ${entries[0].weight}kg` : '기록 없음';
+          changeLabel.className = 'text-xs font-bold text-slate-400';
+        } else {
+          const change = entries[entries.length - 1].weight - entries[0].weight;
+          changeLabel.textContent = change === 0
+            ? '첫 기록과 동일'
+            : `${Math.abs(change).toFixed(1)}kg ${change > 0 ? '증가' : '감소'}`;
+          changeLabel.className = change >= 0 ? 'text-xs font-bold text-lime' : 'text-xs font-bold text-coral';
+        }
+
+        if (!entries.length || typeof Chart === 'undefined') {
+          empty.classList.remove('hidden');
+          if (typeof Chart === 'undefined' && entries.length) empty.textContent = '그래프를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.';
+          if (exerciseChart) {
+            exerciseChart.destroy();
+            exerciseChart = null;
+          }
+          return;
+        }
+        empty.classList.add('hidden');
+
+        const data = {
+          labels: entries.map(entry => entry.date.slice(5).replace('-', '.')),
+          datasets: [{
+            label: selected?.name || '운동 중량',
+            data: entries.map(entry => entry.weight),
+            borderColor: '#c6ff4a',
+            backgroundColor: 'rgba(198,255,74,.14)',
+            pointBackgroundColor: '#c6ff4a',
+            pointBorderColor: '#07111f',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            borderWidth: 2.5,
+            tension: .3,
+            fill: true
+          }]
+        };
+
+        if (exerciseChart) {
+          exerciseChart.data = data;
+          exerciseChart.update();
+          return;
+        }
+
+        exerciseChart = new Chart(document.getElementById('exerciseChart'), {
+          type: 'line',
+          data,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            animation: { duration: 350 },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#07111f', titleColor: '#f8fafc', bodyColor: '#cbd5e1',
+                borderColor: 'rgba(255,255,255,.12)', borderWidth: 1,
+                callbacks: { label: context => `${context.dataset.label}: ${context.parsed.y}kg` }
+              }
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: '#64748b', maxTicksLimit: 5, maxRotation: 0 }, border: { color: 'rgba(255,255,255,.08)' } },
+              y: { grace: '8%', title: { display: true, text: 'kg', color: '#64748b' }, grid: { color: 'rgba(255,255,255,.06)' }, ticks: { color: '#64748b' }, border: { display: false } }
+            }
+          }
+        });
+      };
+
+      exerciseSelect.addEventListener('change', renderExerciseChart);
+
       const dataFeedback = document.getElementById('dataFeedback');
       document.getElementById('exportButton').addEventListener('click', () => {
         const backup = {
@@ -904,7 +1164,11 @@
           if (active) link.setAttribute('aria-current', 'page');
           else link.removeAttribute('aria-current');
         });
-        if (view === 'history') renderHistory();
+        if (view === 'history') {
+          renderMonthCalendar();
+          renderHistory();
+          renderExerciseChart();
+        }
         window.scrollTo(0, 0);
       };
 
