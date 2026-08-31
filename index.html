@@ -197,6 +197,18 @@
 
           <div id="routineList" class="space-y-3"></div>
 
+          <section id="extraExerciseSection" class="mt-5 rounded-2xl border border-dashed border-white/15 bg-white/[.025] p-4">
+            <div class="mb-3 flex items-start justify-between gap-3">
+              <div>
+                <p class="text-[10px] font-black uppercase tracking-[.18em] text-sky-400">Optional · 5~10 min</p>
+                <h4 class="mt-1 text-sm font-extrabold text-white">힘이 남으면 추가 운동</h4>
+                <p class="mt-1 text-[10px] font-semibold text-slate-500">핵심 루틴 완료 후 1~2개만 선택 · 완료율에는 미포함</p>
+              </div>
+              <span id="extraExerciseStatus" class="shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-bold text-slate-400">0개</span>
+            </div>
+            <div id="extraExerciseList" class="space-y-2"></div>
+          </section>
+
           <div class="mt-5 border-t border-white/10 pt-4">
             <div class="mb-2 flex items-center justify-between text-xs font-bold">
               <span class="text-slate-400">저녁 루틴 진행률</span>
@@ -419,30 +431,50 @@
           { id: 'incline-press', name: '인클라인 덤벨/머신 프레스', sets: '3세트 × 12회', note: '자켓 상부 윗가슴 채우기', alternatives: ['인클라인 덤벨 프레스', '인클라인 머신 프레스', '인클라인 스미스 프레스', '로우 인클라인 체스트 프레스'] },
           { id: 'lateral-raise', name: '사이드 레터럴 레이즈', sets: '4세트 × 15~20회', note: '승모근 빼고 어깨 폭 넓히기', alternatives: ['케이블 레터럴 레이즈', '머신 레터럴 레이즈', '원암 케이블 레터럴 레이즈', '린어웨이 레터럴 레이즈'] },
           { id: 'cardio', name: '경사도 런닝머신', sets: '20분 · 경사 11 · 속도 4.0', duration: 20 }
+        ], extras: [
+          { id: 'cable-fly', name: '케이블 플라이', sets: '2세트 × 12~15회', note: '가슴 마무리' },
+          { id: 'rope-pushdown', name: '로프 푸시다운', sets: '2세트 × 12~15회', note: '삼두 보강' },
+          { id: 'cable-crunch', name: '케이블 크런치', sets: '2세트 × 15~20회', note: '복부' }
         ]},
         2: { title: '[Day B] 등 + 후면 어깨', summary: '저녁 근력 25분 + 런닝머신 20분', exercises: [
           { id: 'lat-pulldown', name: '랫풀다운', sets: '4세트 × 12~15회', note: '광배근을 넓혀 V라인 형성', alternatives: ['어시스트 풀업', '뉴트럴 그립 랫풀다운', '머신 풀다운', '원암 케이블 풀다운'] },
           { id: 'seated-row', name: '시티드 케이블 로우', sets: '3세트 × 12회', note: '등 중앙 두께감 & 자켓 뒷태 라인', alternatives: ['체스트 서포티드 로우', '머신 로우', '원암 덤벨 로우', 'T바 로우'] },
           { id: 'rear-delt', name: '페이스풀 / 리버스 펙덱 플라이', sets: '3세트 × 15회', note: '후면 어깨 입체감', alternatives: ['페이스풀', '리버스 펙덱 플라이', '벤트오버 리어 델트 레이즈', '케이블 리어 델트 플라이'] },
           { id: 'cardio', name: '경사도 런닝머신', sets: '20분 · 경사 11 · 속도 4.0', duration: 20 }
+        ], extras: [
+          { id: 'straight-arm-pulldown', name: '스트레이트 암 풀다운', sets: '2세트 × 12~15회', note: '광배 마무리' },
+          { id: 'hammer-curl', name: '해머 컬', sets: '2세트 × 12~15회', note: '이두 & 전완' },
+          { id: 'pallof-press', name: '팔로프 프레스', sets: '2세트 × 12회', note: '좌우 각각 · 코어 안정' }
         ]},
         3: { title: '[Day C] 후면 하체 + 가슴 + 어깨', summary: '저녁 근력 25분 + 런닝머신 20분', exercises: [
           { id: 'romanian-deadlift', name: '루마니안 데드리프트', sets: '3세트 × 10~12회', note: '햄스트링 & 엉덩이 뒤쪽 강화', alternatives: ['덤벨 루마니안 데드리프트', '스미스 머신 루마니안 데드리프트', '시티드 레그컬', '라잉 레그컬', '힙쓰러스트'] },
           { id: 'chest-press', name: '체스트 프레스 머신', sets: '3세트 × 12회', note: '가슴 전체 볼륨', alternatives: ['덤벨 벤치프레스', '스미스 머신 벤치프레스', '푸시업', '케이블 체스트 프레스'] },
           { id: 'lateral-raise', name: '사이드 레터럴 레이즈', sets: '4세트 × 15~20회', note: '측면 어깨 집중', alternatives: ['케이블 레터럴 레이즈', '머신 레터럴 레이즈', '원암 케이블 레터럴 레이즈', '린어웨이 레터럴 레이즈'] },
           { id: 'cardio', name: '경사도 런닝머신', sets: '20분 · 경사 11 · 속도 4.0', duration: 20 }
+        ], extras: [
+          { id: 'seated-leg-curl', name: '시티드 레그컬', sets: '2세트 × 12~15회', note: '햄스트링 추가 자극' },
+          { id: 'hip-thrust', name: '힙쓰러스트', sets: '2세트 × 10~12회', note: '엉덩이 보강' },
+          { id: 'hanging-knee-raise', name: '행잉 니 레이즈', sets: '2세트 × 12~15회', note: '하복부' }
         ]},
         4: { title: '[Day B] 등 + 후면 어깨', summary: '저녁 근력 25분 + 런닝머신 20분', exercises: [
           { id: 'wide-lat-pulldown', name: '랫풀다운 (Wide Grip)', sets: '4세트 × 12회', note: '등 상부 프레임', alternatives: ['와이드 그립 어시스트 풀업', '와이드 그립 머신 풀다운', '하이 로우 머신', '뉴트럴 그립 랫풀다운'] },
           { id: 'one-arm-row', name: '원암 덤벨 로우 / 케이블 로우', sets: '3세트 × 12회', note: '등 하부 & 중앙', alternatives: ['원암 덤벨 로우', '원암 케이블 로우', '체스트 서포티드 로우', '시티드 케이블 로우', 'T바 로우'] },
           { id: 'face-pull', name: '페이스풀', sets: '3세트 × 15회', note: '어깨 후면', alternatives: ['리버스 펙덱 플라이', '케이블 리어 델트 플라이', '벤트오버 리어 델트 레이즈', '밴드 페이스풀'] },
           { id: 'cardio', name: '경사도 런닝머신', sets: '20분 · 경사 11 · 속도 4.0', duration: 20 }
+        ], extras: [
+          { id: 'incline-dumbbell-curl', name: '인클라인 덤벨 컬', sets: '2세트 × 12~15회', note: '이두 보강' },
+          { id: 'cable-pullover', name: '케이블 풀오버', sets: '2세트 × 12~15회', note: '광배 마무리' },
+          { id: 'cable-woodchop', name: '케이블 우드촙', sets: '2세트 × 12회', note: '좌우 각각 · 옆구리 코어' }
         ]},
         5: { title: '[Day D] 하체 + 가슴 + 등 펌핑', summary: '저녁 근력 25분 + 런닝머신 25~30분', exercises: [
           { id: 'incline-press', name: '인클라인 프레스', sets: '3세트 × 12회', note: '가슴', alternatives: ['인클라인 덤벨 프레스', '인클라인 머신 프레스', '인클라인 스미스 프레스', '로우 인클라인 체스트 프레스'] },
           { id: 'lat-pulldown', name: '랫풀다운', sets: '3세트 × 12회', note: '등', alternatives: ['어시스트 풀업', '뉴트럴 그립 랫풀다운', '머신 풀다운', '원암 케이블 풀다운'] },
           { id: 'leg-press', name: '레그프레스', sets: '3세트 × 12~15회', note: '하체 볼륨 & 주간 마무리', alternatives: ['핵 스쿼트', '불가리안 스플릿 스쿼트', '스미스 머신 스쿼트', '고블릿 스쿼트', '워킹 런지'] },
           { id: 'cardio', name: '경사도 런닝머신', sets: '25~30분 · 경사 11 · 속도 4.0', duration: 25 }
+        ], extras: [
+          { id: 'rope-pushdown', name: '로프 푸시다운', sets: '2세트 × 12~15회', note: '삼두 펌핑' },
+          { id: 'hammer-curl', name: '해머 컬', sets: '2세트 × 12~15회', note: '이두 & 전완 펌핑' },
+          { id: 'ab-wheel', name: 'AB 슬라이드', sets: '2세트 × 8~12회', note: '복부 마무리' }
         ]},
         6: { title: '자율 운동 및 휴식', summary: '한 주를 돌아보고 회복에 집중해요.', exercises: [
           { id: 'free', name: '자율 운동', sets: '선택' }, { id: 'stretch', name: '스트레칭', sets: '10분' }
@@ -498,6 +530,9 @@
       today.exercises = today.exercises && typeof today.exercises === 'object' ? today.exercises : {};
       today.morningExercises = today.morningExercises && typeof today.morningExercises === 'object'
         ? today.morningExercises
+        : {};
+      today.extraExercises = today.extraExercises && typeof today.extraExercises === 'object'
+        ? today.extraExercises
         : {};
       if (today.morning === true && !Object.keys(today.morningExercises).length) {
         morningRoutine.forEach(item => { today.morningExercises[item.id] = true; });
@@ -834,6 +869,38 @@
         `;
       }).join('');
 
+      const extraExerciseSection = document.getElementById('extraExerciseSection');
+      const extraExerciseList = document.getElementById('extraExerciseList');
+      const extraExercises = routine.extras || [];
+      extraExerciseSection.classList.toggle('hidden', !extraExercises.length);
+      extraExerciseList.innerHTML = extraExercises.map(exercise => {
+        const saved = today.extraExercises[exercise.id] || {};
+        const loadGuide = getLoadGuide(exercise.sets);
+        return `
+          <article data-extra-exercise="${exercise.id}" class="rounded-xl border border-white/[.08] bg-ink/45 p-3">
+            <div class="flex items-start gap-3">
+              <input type="checkbox" data-field="done" ${saved.done ? 'checked' : ''} aria-label="${exercise.name} 완료" class="mt-0.5 h-5 w-5 shrink-0 rounded accent-lime">
+              <div class="min-w-0 flex-1">
+                <strong class="block text-xs font-extrabold text-white">${exercise.name}</strong>
+                <span class="text-[10px] font-bold text-sky-400">${exercise.sets}</span>
+                <p class="mt-0.5 text-[10px] font-semibold text-slate-500">${exercise.note}</p>
+                <p class="mt-0.5 text-[10px] font-bold text-coral">${loadGuide}</p>
+              </div>
+            </div>
+            <div class="mt-2 grid grid-cols-2 gap-2">
+              <label class="block">
+                <span class="mb-1 block text-[10px] font-bold text-slate-500">무게 (kg)</span>
+                <input type="number" inputmode="decimal" min="0" step="0.5" data-field="weight" value="${escapeAttribute(saved.weight)}" placeholder="0" aria-label="${exercise.name} 무게 (kg)" class="w-full rounded-lg border border-white/10 bg-white/[.045] px-2.5 py-2 text-xs font-bold text-white outline-none focus:border-lime/60">
+              </label>
+              <label class="block">
+                <span class="mb-1 block text-[10px] font-bold text-slate-500">횟수</span>
+                <input type="number" inputmode="numeric" min="0" step="1" data-field="reps" value="${escapeAttribute(saved.reps)}" placeholder="0" aria-label="${exercise.name} 횟수" class="w-full rounded-lg border border-white/10 bg-white/[.045] px-2.5 py-2 text-xs font-bold text-white outline-none focus:border-lime/60">
+              </label>
+            </div>
+          </article>
+        `;
+      }).join('');
+
       const workoutForm = document.getElementById('workoutForm');
       const workoutEditButton = document.getElementById('workoutEditButton');
       const workoutSaveButton = document.getElementById('workoutSaveButton');
@@ -851,6 +918,8 @@
         const eveningChecked = workoutForm.querySelectorAll('[data-exercise] [data-field="done"]:checked').length;
         document.getElementById('routineProgressText').textContent = `${eveningChecked} / ${routine.exercises.length}`;
         document.getElementById('routineProgressBar').style.width = `${(eveningChecked / routine.exercises.length) * 100}%`;
+        const extraChecked = workoutForm.querySelectorAll('[data-extra-exercise] [data-field="done"]:checked').length;
+        document.getElementById('extraExerciseStatus').textContent = `${extraChecked}개`;
       };
 
       const setWorkoutMode = editing => {
@@ -894,9 +963,18 @@
             };
           }
         });
+        const extraValues = {};
+        extraExerciseList.querySelectorAll('[data-extra-exercise]').forEach(card => {
+          extraValues[card.dataset.extraExercise] = {
+            done: card.querySelector('[data-field="done"]').checked,
+            weight: card.querySelector('[data-field="weight"]').value,
+            reps: card.querySelector('[data-field="reps"]').value
+          };
+        });
         today.morningExercises = morningValues;
         today.morning = morningRoutine.every(item => morningValues[item.id]);
         today.exercises = exerciseValues;
+        today.extraExercises = extraValues;
         today.workoutSaved = true;
         if (!saveStore()) {
           workoutFeedback.textContent = '저장하지 못했습니다. 브라우저 저장 공간을 확인해 주세요.';
