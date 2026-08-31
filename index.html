@@ -190,6 +190,11 @@
             <span id="weekdayBadge" class="shrink-0 rounded-2xl bg-lime px-3 py-2 text-sm font-black text-ink"></span>
           </div>
 
+          <div id="routineLoadRule" class="mb-4 rounded-2xl border border-lime/15 bg-lime/[.06] px-4 py-3 text-[11px] font-bold leading-relaxed text-slate-300">
+            <p><span class="text-lime">중량 기준</span> · 반동 없이 자세를 유지할 수 있는 최대 횟수 기준</p>
+            <p class="mt-1 text-slate-500">모든 세트에서 목표 상단 횟수 달성 → 다음 운동 때 기구의 최소 단위만 증량</p>
+          </div>
+
           <div id="routineList" class="space-y-3"></div>
 
           <div class="mt-5 border-t border-white/10 pt-4">
@@ -460,6 +465,17 @@
       const escapeAttribute = value => String(value ?? '').replace(/[&"'<>]/g, character => ({
         '&': '&amp;', '"': '&quot;', "'": '&#39;', '<': '&lt;', '>': '&gt;'
       })[character]);
+      const getLoadGuide = sets => {
+        const range = String(sets).match(/(\d+)세트 × (\d+)~(\d+)회/);
+        if (range) {
+          return `추천 무게 · 최대 ${Number(range[2]) + 2}~${Number(range[3]) + 2}회 가능한 중량`;
+        }
+        const fixed = String(sets).match(/(\d+)세트 × (\d+)회/);
+        if (fixed) {
+          return `추천 무게 · 최대 ${Number(fixed[2]) + 2}회 가능한 중량`;
+        }
+        return '';
+      };
 
       const readStore = () => {
         try {
@@ -514,6 +530,7 @@
       document.getElementById('routineTitle').textContent = routine.title;
       document.getElementById('routineSummary').textContent = routine.summary;
       document.getElementById('routineIntensityGuide').classList.toggle('hidden', weekday === 0 || weekday === 6);
+      document.getElementById('routineLoadRule').classList.toggle('hidden', weekday === 0 || weekday === 6);
       document.getElementById('weekdayBadge').textContent = `${dayNames[weekday]}요일`;
 
       const getWeightEntries = () => Object.entries(store.weights)
@@ -751,6 +768,7 @@
       routineList.innerHTML = routine.exercises.map((exercise, index) => {
         const saved = today.exercises[exercise.id] || {};
         const isCardio = exercise.id === 'cardio';
+        const loadGuide = getLoadGuide(exercise.sets);
         const cardioSpeed = saved.speed ?? saved.weight ?? '4.0';
         const cardioDuration = saved.duration ?? saved.reps ?? exercise.duration ?? '';
         const variantOptions = [exercise.name, ...(exercise.alternatives || [])]
@@ -803,6 +821,7 @@
                   <h4 class="truncate text-sm font-extrabold text-white">${exercise.name}</h4>
                   <p class="text-xs font-semibold text-lime/80">${exercise.sets}</p>
                   ${exercise.note ? `<p class="mt-1 text-[10px] font-semibold text-slate-500">${exercise.note}</p>` : ''}
+                  ${loadGuide ? `<p class="mt-1 text-[10px] font-bold text-coral">${loadGuide}</p>` : ''}
                 </div>
               </div>
               <label class="flex cursor-pointer items-center gap-2 text-xs font-bold text-slate-500">
