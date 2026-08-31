@@ -164,17 +164,17 @@
       <div class="mb-5">
         <p class="text-sm font-bold text-lime">WORKOUT</p>
         <h2 class="mt-1 text-3xl font-black tracking-tight text-white">오늘 운동</h2>
-        <p class="mt-2 text-sm text-slate-400">아침과 저녁 루틴을 하나씩 체크하세요.</p>
+        <p class="mt-2 text-sm text-slate-400">아침 유산소와 저녁 근력 루틴을 하나씩 체크하세요.</p>
       </div>
 
       <form id="workoutForm">
         <section class="mb-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
           <div class="mb-4 flex items-start justify-between gap-3">
             <div>
-              <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-coral">Morning · 15 min</p>
-              <h3 class="text-lg font-extrabold text-white">아침 홈트</h3>
+              <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-coral">Morning · 40 min</p>
+              <h3 class="text-lg font-extrabold text-white">아침 유산소</h3>
             </div>
-            <span id="morningStatus" class="rounded-full bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-400">0 / 3</span>
+            <span id="morningStatus" class="rounded-full bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-400">0 / 1</span>
           </div>
           <div id="morningList" class="space-y-2"></div>
         </section>
@@ -402,33 +402,41 @@
       const STORAGE_KEY = 'd89-diet-tracker-v1';
       const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
       const morningRoutine = [
-        { id: 'squat', name: '스쿼트', detail: '3세트 × 15회' },
-        { id: 'pushup', name: '푸시업', detail: '3세트 × 10회' },
-        { id: 'ab-slide', name: 'AB슬라이드', detail: '3세트 × 10회' }
+        { id: 'morning-stepmill', name: '천국의 계단', detail: '강도 4~5 · 40분' }
       ];
       const routines = {
         0: { title: '자율 운동 및 휴식', summary: '회복을 우선하고 가볍게 움직여요.', exercises: [
           { id: 'free', name: '자율 운동', sets: '선택' }, { id: 'stretch', name: '스트레칭', sets: '10분' }
         ]},
-        1: { title: '하체 털기', summary: '하체 근력 45분 + 유산소 15분', exercises: [
-          { id: 'leg-press', name: '레그프레스', sets: '4세트' }, { id: 'leg-extension', name: '레그익스텐션', sets: '3세트' },
-          { id: 'leg-curl', name: '레그컬', sets: '3세트' }, { id: 'cardio', name: '유산소', sets: '15분' }
+        1: { title: '[Day A] 스쿼트 + 가슴 + 어깨', summary: '저녁 근력 25분 + 런닝머신 20분', exercises: [
+          { id: 'squat', name: '스쿼트', sets: '4세트 × 15~20회', note: '적정 중량으로 땀 빼기 & 엉덩이 자극', alternatives: ['핵 스쿼트', '레그프레스', '고블릿 스쿼트', '스미스 머신 스쿼트'] },
+          { id: 'incline-press', name: '인클라인 덤벨/머신 프레스', sets: '3세트 × 12회', note: '자켓 상부 윗가슴 채우기', alternatives: ['인클라인 덤벨 프레스', '인클라인 머신 프레스', '인클라인 스미스 프레스', '로우 인클라인 체스트 프레스'] },
+          { id: 'lateral-raise', name: '사이드 레터럴 레이즈', sets: '4세트 × 15~20회', note: '승모근 빼고 어깨 폭 넓히기', alternatives: ['케이블 레터럴 레이즈', '머신 레터럴 레이즈', '원암 케이블 레터럴 레이즈', '린어웨이 레터럴 레이즈'] },
+          { id: 'cardio', name: '경사도 런닝머신', sets: '20분 · 경사 11 · 속도 4.0', duration: 20 }
         ]},
-        2: { title: '상체 가슴·등', summary: '밀고 당기는 상체 밸런스 루틴', exercises: [
-          { id: 'lat-pulldown', name: '랫풀다운', sets: '4세트' }, { id: 'chest-press', name: '체스트프레스', sets: '4세트' },
-          { id: 'seated-row', name: '시티디로우', sets: '3세트' }, { id: 'cardio', name: '유산소', sets: '15분' }
+        2: { title: '[Day B] 등 + 후면 어깨', summary: '저녁 근력 25분 + 런닝머신 20분', exercises: [
+          { id: 'lat-pulldown', name: '랫풀다운', sets: '4세트 × 12~15회', note: '광배근을 넓혀 V라인 형성', alternatives: ['어시스트 풀업', '뉴트럴 그립 랫풀다운', '머신 풀다운', '원암 케이블 풀다운'] },
+          { id: 'seated-row', name: '시티드 케이블 로우', sets: '3세트 × 12회', note: '등 중앙 두께감 & 자켓 뒷태 라인', alternatives: ['체스트 서포티드 로우', '머신 로우', '원암 덤벨 로우', 'T바 로우'] },
+          { id: 'rear-delt', name: '페이스풀 / 리버스 펙덱 플라이', sets: '3세트 × 15회', note: '후면 어깨 입체감', alternatives: ['페이스풀', '리버스 펙덱 플라이', '벤트오버 리어 델트 레이즈', '케이블 리어 델트 플라이'] },
+          { id: 'cardio', name: '경사도 런닝머신', sets: '20분 · 경사 11 · 속도 4.0', duration: 20 }
         ]},
-        3: { title: '하체 & 코어', summary: '하체 중심을 잡고 코어까지 단단하게', exercises: [
-          { id: 'squat', name: '스쿼트', sets: '4세트' }, { id: 'leg-press', name: '레그프레스', sets: '3세트' },
-          { id: 'plank', name: '플랭크', sets: '3세트' }, { id: 'cardio', name: '유산소', sets: '15분' }
+        3: { title: '[Day A] 스쿼트 + 가슴 + 어깨', summary: '저녁 근력 25분 + 런닝머신 20분', exercises: [
+          { id: 'squat', name: '스쿼트', sets: '4세트 × 15~20회', note: '자극 집중', alternatives: ['핵 스쿼트', '레그프레스', '고블릿 스쿼트', '스미스 머신 스쿼트'] },
+          { id: 'chest-press', name: '체스트 프레스 머신', sets: '3세트 × 12회', note: '가슴 전체 볼륨', alternatives: ['덤벨 벤치프레스', '스미스 머신 벤치프레스', '푸시업', '케이블 체스트 프레스'] },
+          { id: 'lateral-raise', name: '사이드 레터럴 레이즈', sets: '4세트 × 15~20회', note: '측면 어깨 집중', alternatives: ['케이블 레터럴 레이즈', '머신 레터럴 레이즈', '원암 케이블 레터럴 레이즈', '린어웨이 레터럴 레이즈'] },
+          { id: 'cardio', name: '경사도 런닝머신', sets: '20분 · 경사 11 · 속도 4.0', duration: 20 }
         ]},
-        4: { title: '상체 어깨·팔', summary: '어깨 라인과 팔을 집중 공략하는 날', exercises: [
-          { id: 'shoulder-press', name: '덤벨숄더프레스', sets: '4세트' }, { id: 'lat-pulldown', name: '랫풀다운', sets: '3세트' },
-          { id: 'cable-pushdown', name: '케이블푸시다운', sets: '3세트' }, { id: 'cardio', name: '유산소', sets: '15분' }
+        4: { title: '[Day B] 등 + 후면 어깨', summary: '저녁 근력 25분 + 런닝머신 20분', exercises: [
+          { id: 'wide-lat-pulldown', name: '랫풀다운 (Wide Grip)', sets: '4세트 × 12회', note: '등 상부 프레임', alternatives: ['와이드 그립 어시스트 풀업', '와이드 그립 머신 풀다운', '하이 로우 머신', '뉴트럴 그립 랫풀다운'] },
+          { id: 'one-arm-row', name: '원암 덤벨 로우 / 케이블 로우', sets: '3세트 × 12회', note: '등 하부 & 중앙', alternatives: ['원암 덤벨 로우', '원암 케이블 로우', '체스트 서포티드 로우', '시티드 케이블 로우', 'T바 로우'] },
+          { id: 'face-pull', name: '페이스풀', sets: '3세트 × 15회', note: '어깨 후면', alternatives: ['리버스 펙덱 플라이', '케이블 리어 델트 플라이', '벤트오버 리어 델트 레이즈', '밴드 페이스풀'] },
+          { id: 'cardio', name: '경사도 런닝머신', sets: '20분 · 경사 11 · 속도 4.0', duration: 20 }
         ]},
-        5: { title: '전신 순환', summary: '큰 근육 위주로 주간 루틴을 마무리', exercises: [
-          { id: 'leg-press', name: '레그프레스', sets: '3세트' }, { id: 'chest-press', name: '체스트프레스', sets: '3세트' },
-          { id: 'lat-pulldown', name: '랫풀다운', sets: '3세트' }, { id: 'cardio', name: '유산소', sets: '20분' }
+        5: { title: '[Day C] 상체 전신 펌핑', summary: '저녁 근력 25분 + 런닝머신 25~30분', exercises: [
+          { id: 'incline-press', name: '인클라인 프레스', sets: '3세트 × 12회', note: '가슴', alternatives: ['인클라인 덤벨 프레스', '인클라인 머신 프레스', '인클라인 스미스 프레스', '로우 인클라인 체스트 프레스'] },
+          { id: 'lat-pulldown', name: '랫풀다운', sets: '3세트 × 12회', note: '등', alternatives: ['어시스트 풀업', '뉴트럴 그립 랫풀다운', '머신 풀다운', '원암 케이블 풀다운'] },
+          { id: 'lateral-raise', name: '사이드 레터럴 레이즈', sets: '4세트 × 20회', note: '어깨 펌핑', alternatives: ['케이블 레터럴 레이즈', '머신 레터럴 레이즈', '원암 케이블 레터럴 레이즈', '린어웨이 레터럴 레이즈'] },
+          { id: 'cardio', name: '경사도 런닝머신', sets: '25~30분 · 경사 11 · 속도 4.0', duration: 25 }
         ]},
         6: { title: '자율 운동 및 휴식', summary: '한 주를 돌아보고 회복에 집중해요.', exercises: [
           { id: 'free', name: '자율 운동', sets: '선택' }, { id: 'stretch', name: '스트레칭', sets: '10분' }
@@ -619,7 +627,7 @@
         const morningDone = morningRoutine.filter(item => today.morningExercises[item.id]).length;
         const eveningDone = routine.exercises.filter(item => today.exercises[item.id]?.done).length;
         document.getElementById('todayWorkoutStatus').textContent = today.workoutSaved
-          ? `아침 ${morningDone}/3 · 저녁 ${eveningDone}/${routine.exercises.length}`
+          ? `아침 ${morningDone}/${morningRoutine.length} · 저녁 ${eveningDone}/${routine.exercises.length}`
           : '기록하기';
 
         const height = Number(store.profile.height);
@@ -741,47 +749,38 @@
       routineList.innerHTML = routine.exercises.map((exercise, index) => {
         const saved = today.exercises[exercise.id] || {};
         const isCardio = exercise.id === 'cardio';
-        const cardioType = saved.cardioType || 'treadmill';
-        const cardioSpeed = saved.speed ?? (cardioType === 'treadmill' ? saved.weight : '') ?? '';
-        const cardioLevel = saved.level ?? (cardioType === 'stepmill' ? saved.weight : '') ?? '';
-        const cardioDuration = saved.duration ?? saved.reps ?? '';
+        const cardioSpeed = saved.speed ?? saved.weight ?? '4.0';
+        const cardioDuration = saved.duration ?? saved.reps ?? exercise.duration ?? '';
+        const variantOptions = [exercise.name, ...(exercise.alternatives || [])]
+          .filter((name, optionIndex, names) => names.indexOf(name) === optionIndex);
+        const selectedVariant = saved.variant || exercise.name;
         const detailFields = isCardio ? `
-          <label class="mb-3 block">
-            <span class="mb-1.5 block text-[11px] font-bold text-slate-500">유산소 기구</span>
-            <select data-field="cardioType" aria-label="유산소 기구" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-extrabold text-white outline-none transition focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
-              <option value="treadmill" ${cardioType === 'treadmill' ? 'selected' : ''}>런닝머신</option>
-              <option value="stepmill" ${cardioType === 'stepmill' ? 'selected' : ''}>스텝밀</option>
-            </select>
-          </label>
           <div class="mb-3 rounded-xl border border-coral/15 bg-coral/[.07] px-3 py-2.5 text-xs font-bold leading-relaxed text-slate-300">
-            <p data-treadmill-guide class="${cardioType === 'treadmill' ? '' : 'hidden'}"><span class="text-coral">런닝머신 권장</span> · 경사도 10~12 · 속도 4.0~4.5<br><span class="text-slate-500">뛰지 말고 파워워킹으로 걷기</span></p>
-            <p data-stepmill-guide class="${cardioType === 'stepmill' ? '' : 'hidden'}"><span class="text-coral">스텝밀 권장</span> · 레벨 3~4</p>
+            <p><span class="text-coral">저녁 유산소 고정</span> · 런닝머신 경사 11 · 속도 4.0<br><span class="text-slate-500">뛰지 말고 파워워킹으로 걷기</span></p>
           </div>
-          <div data-treadmill-fields class="grid grid-cols-2 gap-2 ${cardioType === 'treadmill' ? '' : 'hidden'}">
+          <div class="grid grid-cols-2 gap-2">
             <label class="block">
               <span class="mb-1.5 block text-[11px] font-bold text-slate-500">경사도</span>
-              <input type="number" inputmode="decimal" min="0" step="0.5" data-field="incline" value="${escapeAttribute(saved.incline)}" placeholder="10 ~ 12" aria-label="런닝머신 경사도" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-600 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+              <input type="number" inputmode="decimal" min="0" step="0.5" data-field="incline" value="${escapeAttribute(saved.incline ?? 11)}" placeholder="11" aria-label="런닝머신 경사도" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-600 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
             </label>
             <label class="block">
               <span class="mb-1.5 block text-[11px] font-bold text-slate-500">속도</span>
-              <input type="number" inputmode="decimal" min="0" step="0.1" data-field="speed" value="${escapeAttribute(cardioSpeed)}" placeholder="4.0 ~ 4.5" aria-label="런닝머신 속도" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-600 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+              <input type="number" inputmode="decimal" min="0" step="0.1" data-field="speed" value="${escapeAttribute(cardioSpeed)}" placeholder="4.0" aria-label="런닝머신 속도" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-600 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
             </label>
           </div>
-          <div data-stepmill-fields class="grid grid-cols-2 gap-2 ${cardioType === 'stepmill' ? '' : 'hidden'}">
-            <label class="block">
-              <span class="mb-1.5 block text-[11px] font-bold text-slate-500">레벨</span>
-              <input type="number" inputmode="decimal" min="0" step="0.5" data-field="level" value="${escapeAttribute(cardioLevel)}" placeholder="3 ~ 4" aria-label="스텝밀 레벨" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-600 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
-            </label>
-            <label class="block">
-              <span class="mb-1.5 block text-[11px] font-bold text-slate-500">시간 (분)</span>
-              <input type="number" inputmode="numeric" min="0" step="1" data-field="duration" value="${escapeAttribute(cardioDuration)}" placeholder="15" aria-label="스텝밀 시간 (분)" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-600 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
-            </label>
-          </div>
-          <label data-treadmill-time class="mt-2 block ${cardioType === 'treadmill' ? '' : 'hidden'}">
+          <label class="mt-2 block">
             <span class="mb-1.5 block text-[11px] font-bold text-slate-500">시간 (분)</span>
-            <input type="number" inputmode="numeric" min="0" step="1" data-field="duration" value="${escapeAttribute(cardioDuration)}" placeholder="15" aria-label="런닝머신 시간 (분)" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-600 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+            <input type="number" inputmode="numeric" min="0" step="1" data-field="duration" value="${escapeAttribute(cardioDuration)}" placeholder="${exercise.duration || 20}" aria-label="런닝머신 시간 (분)" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none transition placeholder:text-slate-600 focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
           </label>
         ` : `
+          ${exercise.alternatives?.length ? `
+            <label class="mb-3 block">
+              <span class="mb-1.5 block text-[11px] font-bold text-slate-500">오늘 할 운동 · 대체 가능</span>
+              <select data-field="variant" aria-label="${exercise.name} 대체 운동" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-extrabold text-white outline-none transition focus:border-lime/60 focus:ring-2 focus:ring-lime/10">
+                ${variantOptions.map(name => `<option value="${escapeAttribute(name)}" ${name === selectedVariant ? 'selected' : ''}>${name}</option>`).join('')}
+              </select>
+            </label>
+          ` : ''}
           <div class="grid grid-cols-2 gap-2">
             <label class="block">
               <span class="mb-1.5 block text-[11px] font-bold text-slate-500">무게 (kg)</span>
@@ -801,6 +800,7 @@
                 <div class="min-w-0">
                   <h4 class="truncate text-sm font-extrabold text-white">${exercise.name}</h4>
                   <p class="text-xs font-semibold text-lime/80">${exercise.sets}</p>
+                  ${exercise.note ? `<p class="mt-1 text-[10px] font-semibold text-slate-500">${exercise.note}</p>` : ''}
                 </div>
               </div>
               <label class="flex cursor-pointer items-center gap-2 text-xs font-bold text-slate-500">
@@ -818,17 +818,6 @@
       const workoutSaveButton = document.getElementById('workoutSaveButton');
       const workoutFeedback = document.getElementById('workoutFeedback');
       const workoutFields = Array.from(workoutForm.querySelectorAll('input, select'));
-
-      const paintCardioFields = card => {
-        if (!card) return;
-        const type = card.querySelector('[data-field="cardioType"]')?.value || 'treadmill';
-        const treadmill = type === 'treadmill';
-        card.querySelector('[data-treadmill-guide]')?.classList.toggle('hidden', !treadmill);
-        card.querySelector('[data-stepmill-guide]')?.classList.toggle('hidden', treadmill);
-        card.querySelector('[data-treadmill-fields]')?.classList.toggle('hidden', !treadmill);
-        card.querySelector('[data-stepmill-fields]')?.classList.toggle('hidden', treadmill);
-        card.querySelector('[data-treadmill-time]')?.classList.toggle('hidden', !treadmill);
-      };
 
       const paintWorkoutDraft = () => {
         const morningChecked = workoutForm.querySelectorAll('[data-morning-id]:checked').length;
@@ -851,10 +840,7 @@
 
       setWorkoutMode(!today.workoutSaved);
       paintWorkoutDraft();
-      workoutForm.addEventListener('input', event => {
-        if (event.target.dataset.field === 'cardioType') paintCardioFields(event.target.closest('[data-exercise]'));
-        paintWorkoutDraft();
-      });
+      workoutForm.addEventListener('input', paintWorkoutDraft);
       workoutEditButton.addEventListener('click', () => {
         workoutFeedback.textContent = '';
         setWorkoutMode(true);
@@ -871,21 +857,17 @@
           const id = card.dataset.exercise;
           const done = card.querySelector('[data-field="done"]').checked;
           if (id === 'cardio') {
-            const cardioType = card.querySelector('[data-field="cardioType"]').value;
-            const durationInput = cardioType === 'treadmill'
-              ? card.querySelector('[data-treadmill-time] [data-field="duration"]')
-              : card.querySelector('[data-stepmill-fields] [data-field="duration"]');
             exerciseValues[id] = {
               done,
-              cardioType,
+              cardioType: 'treadmill',
               incline: card.querySelector('[data-field="incline"]').value,
               speed: card.querySelector('[data-field="speed"]').value,
-              level: card.querySelector('[data-field="level"]').value,
-              duration: durationInput.value
+              duration: card.querySelector('[data-field="duration"]').value
             };
           } else {
             exerciseValues[id] = {
               done,
+              variant: card.querySelector('[data-field="variant"]')?.value || '',
               weight: card.querySelector('[data-field="weight"]').value,
               reps: card.querySelector('[data-field="reps"]').value
             };
