@@ -182,9 +182,10 @@
         <section class="rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
           <div class="mb-5 flex items-start justify-between gap-3">
             <div>
-              <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-lime">Evening · 1 hour</p>
+              <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-lime">Evening · 45~55 min</p>
               <h3 id="routineTitle" class="text-xl font-black text-white"></h3>
               <p id="routineSummary" class="mt-1 text-sm text-slate-400"></p>
+              <p id="routineIntensityGuide" class="mt-2 text-[11px] font-bold text-coral">근력 세트간 60~90초 · 마지막 세트 1~2회 여유</p>
             </div>
             <span id="weekdayBadge" class="shrink-0 rounded-2xl bg-lime px-3 py-2 text-sm font-black text-ink"></span>
           </div>
@@ -420,8 +421,8 @@
           { id: 'rear-delt', name: '페이스풀 / 리버스 펙덱 플라이', sets: '3세트 × 15회', note: '후면 어깨 입체감', alternatives: ['페이스풀', '리버스 펙덱 플라이', '벤트오버 리어 델트 레이즈', '케이블 리어 델트 플라이'] },
           { id: 'cardio', name: '경사도 런닝머신', sets: '20분 · 경사 11 · 속도 4.0', duration: 20 }
         ]},
-        3: { title: '[Day A] 스쿼트 + 가슴 + 어깨', summary: '저녁 근력 25분 + 런닝머신 20분', exercises: [
-          { id: 'squat', name: '스쿼트', sets: '4세트 × 15~20회', note: '자극 집중', alternatives: ['핵 스쿼트', '레그프레스', '고블릿 스쿼트', '스미스 머신 스쿼트'] },
+        3: { title: '[Day C] 후면 하체 + 가슴 + 어깨', summary: '저녁 근력 25분 + 런닝머신 20분', exercises: [
+          { id: 'romanian-deadlift', name: '루마니안 데드리프트', sets: '3세트 × 10~12회', note: '햄스트링 & 엉덩이 뒤쪽 강화', alternatives: ['덤벨 루마니안 데드리프트', '스미스 머신 루마니안 데드리프트', '시티드 레그컬', '라잉 레그컬', '힙쓰러스트'] },
           { id: 'chest-press', name: '체스트 프레스 머신', sets: '3세트 × 12회', note: '가슴 전체 볼륨', alternatives: ['덤벨 벤치프레스', '스미스 머신 벤치프레스', '푸시업', '케이블 체스트 프레스'] },
           { id: 'lateral-raise', name: '사이드 레터럴 레이즈', sets: '4세트 × 15~20회', note: '측면 어깨 집중', alternatives: ['케이블 레터럴 레이즈', '머신 레터럴 레이즈', '원암 케이블 레터럴 레이즈', '린어웨이 레터럴 레이즈'] },
           { id: 'cardio', name: '경사도 런닝머신', sets: '20분 · 경사 11 · 속도 4.0', duration: 20 }
@@ -432,10 +433,10 @@
           { id: 'face-pull', name: '페이스풀', sets: '3세트 × 15회', note: '어깨 후면', alternatives: ['리버스 펙덱 플라이', '케이블 리어 델트 플라이', '벤트오버 리어 델트 레이즈', '밴드 페이스풀'] },
           { id: 'cardio', name: '경사도 런닝머신', sets: '20분 · 경사 11 · 속도 4.0', duration: 20 }
         ]},
-        5: { title: '[Day C] 상체 전신 펌핑', summary: '저녁 근력 25분 + 런닝머신 25~30분', exercises: [
+        5: { title: '[Day D] 하체 + 가슴 + 등 펌핑', summary: '저녁 근력 25분 + 런닝머신 25~30분', exercises: [
           { id: 'incline-press', name: '인클라인 프레스', sets: '3세트 × 12회', note: '가슴', alternatives: ['인클라인 덤벨 프레스', '인클라인 머신 프레스', '인클라인 스미스 프레스', '로우 인클라인 체스트 프레스'] },
           { id: 'lat-pulldown', name: '랫풀다운', sets: '3세트 × 12회', note: '등', alternatives: ['어시스트 풀업', '뉴트럴 그립 랫풀다운', '머신 풀다운', '원암 케이블 풀다운'] },
-          { id: 'lateral-raise', name: '사이드 레터럴 레이즈', sets: '4세트 × 20회', note: '어깨 펌핑', alternatives: ['케이블 레터럴 레이즈', '머신 레터럴 레이즈', '원암 케이블 레터럴 레이즈', '린어웨이 레터럴 레이즈'] },
+          { id: 'leg-press', name: '레그프레스', sets: '3세트 × 12~15회', note: '하체 볼륨 & 주간 마무리', alternatives: ['핵 스쿼트', '불가리안 스플릿 스쿼트', '스미스 머신 스쿼트', '고블릿 스쿼트', '워킹 런지'] },
           { id: 'cardio', name: '경사도 런닝머신', sets: '25~30분 · 경사 11 · 속도 4.0', duration: 25 }
         ]},
         6: { title: '자율 운동 및 휴식', summary: '한 주를 돌아보고 회복에 집중해요.', exercises: [
@@ -512,6 +513,7 @@
       document.getElementById('weightDateLabel').textContent = fullDate;
       document.getElementById('routineTitle').textContent = routine.title;
       document.getElementById('routineSummary').textContent = routine.summary;
+      document.getElementById('routineIntensityGuide').classList.toggle('hidden', weekday === 0 || weekday === 6);
       document.getElementById('weekdayBadge').textContent = `${dayNames[weekday]}요일`;
 
       const getWeightEntries = () => Object.entries(store.weights)
