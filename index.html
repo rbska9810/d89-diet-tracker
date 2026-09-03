@@ -168,7 +168,7 @@
       </div>
 
       <form id="workoutForm">
-        <section class="mb-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
+        <section id="morningRoutineSection" class="mb-4 rounded-3xl border border-white/10 bg-panel p-5 shadow-glow">
           <div class="mb-4 flex items-start justify-between gap-3">
             <div>
               <p class="mb-1 text-xs font-bold uppercase tracking-[.18em] text-coral">Morning · 40 min</p>
@@ -197,7 +197,7 @@
 
           <div id="routineList" class="space-y-3"></div>
 
-          <div class="mt-5 border-t border-white/10 pt-4">
+          <div id="routineProgressSection" class="mt-5 border-t border-white/10 pt-4">
             <div class="mb-2 flex items-center justify-between text-xs font-bold">
               <span class="text-slate-400">저녁 루틴 진행률</span>
               <span id="routineProgressText" class="text-lime">0 / 0</span>
@@ -209,7 +209,7 @@
         </section>
 
         <p id="workoutFeedback" class="mt-3 min-h-5 text-center text-xs font-bold text-lime" aria-live="polite"></p>
-        <div class="flex gap-3">
+        <div id="workoutActions" class="flex gap-3">
           <button id="workoutEditButton" type="button" class="hidden min-h-12 flex-1 rounded-2xl border border-white/15 bg-white/[.05] px-4 text-sm font-extrabold text-white transition active:scale-[.98]">수정</button>
           <button id="workoutSaveButton" type="submit" class="min-h-12 flex-1 rounded-2xl bg-lime px-4 text-sm font-black text-ink transition active:scale-[.98]">오늘 운동 저장</button>
         </div>
@@ -407,15 +407,13 @@
 
       const STORAGE_KEY = 'd89-diet-tracker-v1';
       const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-      const morningRoutine = [
-        { id: 'morning-stepmill', name: '천국의 계단', detail: '강도 4~5 · 40분' }
-      ];
+      const getMorningRoutine = dayIndex => dayIndex >= 1 && dayIndex <= 5
+        ? [{ id: 'morning-stepmill', name: '천국의 계단', detail: '강도 4~5 · 40분' }]
+        : [];
       const routines = {
-        0: { title: '자율 운동 및 휴식', summary: '회복을 우선하고 가볍게 움직여요.', exercises: [
-          { id: 'free', name: '자율 운동', sets: '선택' }, { id: 'stretch', name: '스트레칭', sets: '10분' }
-        ]},
+        0: { title: '주말 완전 휴식', summary: '운동 없이 푹 쉬고 다음 주를 준비하세요.', exercises: [] },
         1: { title: '[Day A] 스쿼트 + 가슴 + 어깨', summary: '근력 25분 + 런닝머신 20분 + 필수 코어', exercises: [
-          { id: 'squat', name: '스쿼트', sets: '4세트 × 15~20회', note: '적정 중량으로 땀 빼기 & 엉덩이 자극', alternatives: ['핵 스쿼트', '레그프레스', '고블릿 스쿼트', '스미스 머신 스쿼트'] },
+          { id: 'squat', name: '스쿼트', sets: '4세트 × 10~15회', note: '감량기에도 중량을 유지하며 하체 자극', alternatives: ['핵 스쿼트', '레그프레스', '고블릿 스쿼트', '스미스 머신 스쿼트'] },
           { id: 'incline-press', name: '인클라인 덤벨/머신 프레스', sets: '3세트 × 12회', note: '자켓 상부 윗가슴 채우기', alternatives: ['인클라인 덤벨 프레스', '인클라인 머신 프레스', '인클라인 스미스 프레스', '로우 인클라인 체스트 프레스'] },
           { id: 'lateral-raise', name: '사이드 레터럴 레이즈', sets: '4세트 × 15~20회', note: '승모근 빼고 어깨 폭 넓히기', alternatives: ['케이블 레터럴 레이즈', '머신 레터럴 레이즈', '원암 케이블 레터럴 레이즈', '린어웨이 레터럴 레이즈'] },
           { id: 'cardio', name: '경사도 런닝머신', sets: '20분 · 경사 11 · 속도 4.0', duration: 20 },
@@ -449,9 +447,7 @@
           { id: 'cardio', name: '경사도 런닝머신', sets: '25~30분 · 경사 11 · 속도 4.0', duration: 25 },
           { id: 'hanging-knee-raise', name: '행잉 니 레이즈', sets: '3세트 × 15회', note: '근력·유산소 후 필수 코어' }
         ]},
-        6: { title: '자율 운동 및 휴식', summary: '한 주를 돌아보고 회복에 집중해요.', exercises: [
-          { id: 'free', name: '자율 운동', sets: '선택' }, { id: 'stretch', name: '스트레칭', sets: '10분' }
-        ]}
+        6: { title: '주말 완전 휴식', summary: '아침 천계와 저녁 운동 없이 회복에 집중하세요.', exercises: [] }
       };
       const excludedChartExercises = new Set(['cardio', 'free', 'stretch', 'hanging-knee-raise']);
       const exerciseCatalog = Array.from(new Map(
@@ -465,6 +461,7 @@
       const pad = value => String(value).padStart(2, '0');
       const dateKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
       const weekday = now.getDay();
+      const morningRoutine = getMorningRoutine(weekday);
       const routine = routines[weekday];
       const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
       const escapeAttribute = value => String(value ?? '').replace(/[&"'<>]/g, character => ({
@@ -527,6 +524,18 @@
         }
       };
 
+      const GOAL_PLAN_VERSION = 'wedding-2026-11-21-v1';
+      if (store.goalPlanVersion !== GOAL_PLAN_VERSION) {
+        store.profile.height = '178';
+        store.profile.startWeight = store.profile.startWeight || '86.2';
+        store.profile.goalWeight = '74';
+        store.profile.targetDate = '2026-11-21';
+        store.profile.saved = true;
+        if (!hasOwn(store.weights, dateKey)) store.weights[dateKey] = 86.2;
+        store.goalPlanVersion = GOAL_PLAN_VERSION;
+        saveStore();
+      }
+
       const fullDate = new Intl.DateTimeFormat('ko-KR', {
         year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
       }).format(now);
@@ -536,6 +545,8 @@
       document.getElementById('routineSummary').textContent = routine.summary;
       document.getElementById('routineIntensityGuide').classList.toggle('hidden', weekday === 0 || weekday === 6);
       document.getElementById('routineLoadRule').classList.toggle('hidden', weekday === 0 || weekday === 6);
+      document.getElementById('routineProgressSection').classList.toggle('hidden', !routine.exercises.length);
+      document.getElementById('workoutActions').classList.toggle('hidden', !morningRoutine.length && !routine.exercises.length);
       document.getElementById('weekdayBadge').textContent = `${dayNames[weekday]}요일`;
 
       const getWeightEntries = () => Object.entries(store.weights)
@@ -650,9 +661,12 @@
           : '기록하기';
         const morningDone = morningRoutine.filter(item => today.morningExercises[item.id]).length;
         const eveningDone = routine.exercises.filter(item => today.exercises[item.id]?.done).length;
-        document.getElementById('todayWorkoutStatus').textContent = today.workoutSaved
-          ? `아침 ${morningDone}/${morningRoutine.length} · 저녁 ${eveningDone}/${routine.exercises.length}`
-          : '기록하기';
+        const morningLabel = morningRoutine.length ? `아침 ${morningDone}/${morningRoutine.length}` : '아침 회복';
+        document.getElementById('todayWorkoutStatus').textContent = !morningRoutine.length && !routine.exercises.length
+          ? '오늘은 완전 휴식'
+          : today.workoutSaved
+            ? `${morningLabel} · 저녁 ${eveningDone}/${routine.exercises.length}`
+            : '기록하기';
 
         const height = Number(store.profile.height);
         const bmi = hasLatest && Number.isFinite(height) && height > 0 ? latest / ((height / 100) ** 2) : null;
@@ -757,6 +771,7 @@
       });
 
       const morningList = document.getElementById('morningList');
+      document.getElementById('morningRoutineSection').classList.toggle('hidden', !morningRoutine.length);
       morningList.innerHTML = morningRoutine.map((item, index) => `
         <label class="flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-ink/55 px-4 transition active:scale-[.99]">
           <input type="checkbox" data-morning-id="${item.id}" ${today.morningExercises[item.id] ? 'checked' : ''} class="h-5 w-5 shrink-0 rounded accent-lime">
@@ -770,7 +785,7 @@
       `).join('');
 
       const routineList = document.getElementById('routineList');
-      routineList.innerHTML = routine.exercises.map((exercise, index) => {
+      routineList.innerHTML = routine.exercises.length ? routine.exercises.map((exercise, index) => {
         const saved = today.exercises[exercise.id] || {};
         const isCardio = exercise.id === 'cardio';
         const isBodyweight = exercise.id === 'hanging-knee-raise';
@@ -840,7 +855,12 @@
             ${detailFields}
           </article>
         `;
-      }).join('');
+      }).join('') : `
+        <div class="rounded-2xl border border-sky-400/15 bg-sky-400/[.06] px-5 py-8 text-center">
+          <strong class="block text-base font-black text-white">토·일은 완전 회복</strong>
+          <p class="mt-2 text-xs font-semibold leading-relaxed text-slate-400">아침 천계와 저녁 운동 없이 충분히 자고 쉬세요.<br>가벼운 일상 산책만 해도 충분합니다.</p>
+        </div>
+      `;
 
       const workoutForm = document.getElementById('workoutForm');
       const workoutEditButton = document.getElementById('workoutEditButton');
@@ -858,7 +878,9 @@
 
         const eveningChecked = workoutForm.querySelectorAll('[data-exercise] [data-field="done"]:checked').length;
         document.getElementById('routineProgressText').textContent = `${eveningChecked} / ${routine.exercises.length}`;
-        document.getElementById('routineProgressBar').style.width = `${(eveningChecked / routine.exercises.length) * 100}%`;
+        document.getElementById('routineProgressBar').style.width = routine.exercises.length
+          ? `${(eveningChecked / routine.exercises.length) * 100}%`
+          : '0%';
       };
 
       const setWorkoutMode = editing => {
@@ -903,7 +925,7 @@
           }
         });
         today.morningExercises = morningValues;
-        today.morning = morningRoutine.every(item => morningValues[item.id]);
+        today.morning = morningRoutine.length > 0 && morningRoutine.every(item => morningValues[item.id]);
         today.exercises = exerciseValues;
         today.workoutSaved = true;
         if (!saveStore()) {
@@ -929,9 +951,10 @@
         const key = formatDateKey(date);
         const dayData = store.days[key] || {};
         const morningValues = dayData.morningExercises || {};
-        const morningCount = dayData.morning === true
-          ? morningRoutine.length
-          : morningRoutine.filter(item => morningValues[item.id]).length;
+        const dayMorningRoutine = getMorningRoutine(date.getDay());
+        const morningCount = dayData.morning === true && dayMorningRoutine.length
+          ? dayMorningRoutine.length
+          : dayMorningRoutine.filter(item => morningValues[item.id]).length;
         const dayRoutine = routines[date.getDay()];
         const dayExercises = dayData.exercises || {};
         const eveningCount = dayRoutine.exercises.filter(item => dayExercises[item.id]?.done).length;
@@ -939,10 +962,11 @@
         return {
           key,
           morningCount,
-          morningComplete: morningCount === morningRoutine.length,
+          morningTotal: dayMorningRoutine.length,
+          morningComplete: dayMorningRoutine.length > 0 && morningCount === dayMorningRoutine.length,
           eveningCount,
           eveningTotal: dayRoutine.exercises.length,
-          eveningComplete: eveningCount === dayRoutine.exercises.length,
+          eveningComplete: dayRoutine.exercises.length > 0 && eveningCount === dayRoutine.exercises.length,
           hasWeight,
           attended: morningCount > 0 || eveningCount > 0
         };
@@ -985,7 +1009,9 @@
             ? `<i class="h-1.5 w-1.5 rounded-full ${snapshot.eveningComplete ? 'bg-lime' : 'bg-lime/35'}"></i>`
             : '';
           const weightDot = snapshot.hasWeight ? '<i class="h-1.5 w-1.5 rounded-full bg-sky-400"></i>' : '';
-          const aria = `${month + 1}월 ${dayNumber}일, 아침 ${snapshot.morningCount}/${morningRoutine.length}, 저녁 ${snapshot.eveningCount}/${snapshot.eveningTotal}${snapshot.hasWeight ? ', 체중 기록 있음' : ''}`;
+          const morningAria = snapshot.morningTotal ? `아침 ${snapshot.morningCount}/${snapshot.morningTotal}` : '아침 회복일';
+          const eveningAria = snapshot.eveningTotal ? `저녁 ${snapshot.eveningCount}/${snapshot.eveningTotal}` : '저녁 회복일';
+          const aria = `${month + 1}월 ${dayNumber}일, ${morningAria}, ${eveningAria}${snapshot.hasWeight ? ', 체중 기록 있음' : ''}`;
           return `
             <div aria-label="${aria}" class="flex min-h-14 flex-col items-center justify-center rounded-xl border ${isToday ? 'border-lime/40 bg-lime/[.08]' : 'border-white/[.06] bg-ink/35'} ${isFuture ? 'opacity-30' : ''}">
               <strong class="text-xs font-black ${isToday ? 'text-lime' : 'text-slate-300'}">${dayNumber}</strong>
@@ -1043,9 +1069,10 @@
           const key = formatDateKey(date);
           const dayData = store.days[key] || {};
           const morningValues = dayData.morningExercises || {};
-          const morningCount = dayData.morning === true
-            ? morningRoutine.length
-            : morningRoutine.filter(item => morningValues[item.id]).length;
+          const dayMorningRoutine = getMorningRoutine(date.getDay());
+          const morningCount = dayData.morning === true && dayMorningRoutine.length
+            ? dayMorningRoutine.length
+            : dayMorningRoutine.filter(item => morningValues[item.id]).length;
           const dayRoutine = routines[date.getDay()];
           const dayExercises = dayData.exercises || {};
           const eveningCount = dayRoutine.exercises.filter(item => dayExercises[item.id]?.done).length;
@@ -1053,8 +1080,8 @@
           const hasWorkout = Boolean(dayData.workoutSaved || morningCount || Object.keys(dayExercises).length);
           const recorded = hasWeight || hasWorkout;
           if (recorded) recordedDays += 1;
-          if (morningCount === morningRoutine.length) morningDays += 1;
-          if (eveningCount === dayRoutine.exercises.length) eveningDays += 1;
+          if (dayMorningRoutine.length && morningCount === dayMorningRoutine.length) morningDays += 1;
+          if (dayRoutine.exercises.length && eveningCount === dayRoutine.exercises.length) eveningDays += 1;
 
           const isToday = key === dateKey;
           const isFuture = date > new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -1066,8 +1093,8 @@
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap gap-1.5">
-                  <span class="rounded-full bg-coral/10 px-2 py-1 text-[10px] font-bold text-coral">아침 ${morningCount}/${morningRoutine.length}</span>
-                  <span class="rounded-full bg-lime/10 px-2 py-1 text-[10px] font-bold text-lime">저녁 ${eveningCount}/${dayRoutine.exercises.length}</span>
+                  <span class="rounded-full bg-coral/10 px-2 py-1 text-[10px] font-bold text-coral">${dayMorningRoutine.length ? `아침 ${morningCount}/${dayMorningRoutine.length}` : '아침 회복'}</span>
+                  <span class="rounded-full bg-lime/10 px-2 py-1 text-[10px] font-bold text-lime">${dayRoutine.exercises.length ? `저녁 ${eveningCount}/${dayRoutine.exercises.length}` : '저녁 회복'}</span>
                 </div>
               </div>
               <div class="shrink-0 text-right">
