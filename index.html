@@ -407,11 +407,14 @@
 
       const STORAGE_KEY = 'd89-diet-tracker-v1';
       const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-      const getMorningRoutine = dayIndex => dayIndex >= 1 && dayIndex <= 5
-        ? [{ id: 'morning-stepmill', name: '천국의 계단', detail: '강도 4~5 · 40분' }]
-        : [];
+      const getMorningRoutine = dayIndex => [{
+        id: 'morning-stepmill',
+        name: '천국의 계단',
+        detail: '강도 4~5 · 40분',
+        optional: dayIndex === 0 || dayIndex === 6
+      }];
       const routines = {
-        0: { title: '주말 완전 휴식', summary: '운동 없이 푹 쉬고 다음 주를 준비하세요.', exercises: [] },
+        0: { title: '주말 회복일', summary: '저녁 운동은 쉬고, 컨디션이 좋으면 아침 천계만 선택하세요.', exercises: [] },
         1: { title: '[Day A] 스쿼트 + 가슴 + 어깨', summary: '근력 25분 + 런닝머신 20분 + 필수 코어', exercises: [
           { id: 'squat', name: '스쿼트', sets: '4세트 × 10~15회', note: '감량기에도 중량을 유지하며 하체 자극', alternatives: ['핵 스쿼트', '레그프레스', '고블릿 스쿼트', '스미스 머신 스쿼트'] },
           { id: 'incline-press', name: '인클라인 덤벨/머신 프레스', sets: '3세트 × 12회', note: '자켓 상부 윗가슴 채우기', alternatives: ['인클라인 덤벨 프레스', '인클라인 머신 프레스', '인클라인 스미스 프레스', '로우 인클라인 체스트 프레스'] },
@@ -447,7 +450,7 @@
           { id: 'cardio', name: '경사도 런닝머신', sets: '25~30분 · 경사 11 · 속도 4.0', duration: 25 },
           { id: 'hanging-knee-raise', name: '행잉 니 레이즈', sets: '3세트 × 15회', note: '근력·유산소 후 필수 코어' }
         ]},
-        6: { title: '주말 완전 휴식', summary: '아침 천계와 저녁 운동 없이 회복에 집중하세요.', exercises: [] }
+        6: { title: '주말 회복일', summary: '저녁 운동은 쉬고, 컨디션이 좋으면 아침 천계만 선택하세요.', exercises: [] }
       };
       const excludedChartExercises = new Set(['cardio', 'free', 'stretch', 'hanging-knee-raise']);
       const exerciseCatalog = Array.from(new Map(
@@ -661,12 +664,13 @@
           : '기록하기';
         const morningDone = morningRoutine.filter(item => today.morningExercises[item.id]).length;
         const eveningDone = routine.exercises.filter(item => today.exercises[item.id]?.done).length;
-        const morningLabel = morningRoutine.length ? `아침 ${morningDone}/${morningRoutine.length}` : '아침 회복';
-        document.getElementById('todayWorkoutStatus').textContent = !morningRoutine.length && !routine.exercises.length
-          ? '오늘은 완전 휴식'
-          : today.workoutSaved
-            ? `${morningLabel} · 저녁 ${eveningDone}/${routine.exercises.length}`
-            : '기록하기';
+        const optionalMorning = morningRoutine.every(item => item.optional);
+        const morningLabel = optionalMorning
+          ? morningDone ? '선택 천계 완료' : '회복 또는 선택 천계'
+          : `아침 ${morningDone}/${morningRoutine.length}`;
+        document.getElementById('todayWorkoutStatus').textContent = today.workoutSaved
+          ? `${morningLabel} · ${routine.exercises.length ? `저녁 ${eveningDone}/${routine.exercises.length}` : '저녁 회복'}`
+          : optionalMorning ? '회복일 · 천계 선택 가능' : '기록하기';
 
         const height = Number(store.profile.height);
         const bmi = hasLatest && Number.isFinite(height) && height > 0 ? latest / ((height / 100) ** 2) : null;
@@ -777,10 +781,10 @@
           <input type="checkbox" data-morning-id="${item.id}" ${today.morningExercises[item.id] ? 'checked' : ''} class="h-5 w-5 shrink-0 rounded accent-lime">
           <span class="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white/[.06] text-xs font-black text-slate-400">${index + 1}</span>
           <span class="min-w-0 flex-1">
-            <strong class="block text-sm font-extrabold text-white">${item.name}</strong>
+            <strong class="flex items-center gap-2 text-sm font-extrabold text-white">${item.name}${item.optional ? '<em class="rounded-full bg-sky-400/10 px-2 py-0.5 text-[10px] not-italic text-sky-300">선택</em>' : ''}</strong>
             <span class="text-xs font-bold text-coral">${item.detail}</span>
           </span>
-          <span class="text-xs font-bold text-slate-500">완료</span>
+          <span class="text-xs font-bold text-slate-500">${item.optional ? '했어요' : '완료'}</span>
         </label>
       `).join('');
 
@@ -857,8 +861,8 @@
         `;
       }).join('') : `
         <div class="rounded-2xl border border-sky-400/15 bg-sky-400/[.06] px-5 py-8 text-center">
-          <strong class="block text-base font-black text-white">토·일은 완전 회복</strong>
-          <p class="mt-2 text-xs font-semibold leading-relaxed text-slate-400">아침 천계와 저녁 운동 없이 충분히 자고 쉬세요.<br>가벼운 일상 산책만 해도 충분합니다.</p>
+          <strong class="block text-base font-black text-white">토·일 저녁은 완전 회복</strong>
+          <p class="mt-2 text-xs font-semibold leading-relaxed text-slate-400">아침 천계는 컨디션이 좋을 때만 선택하세요.<br>하지 않아도 계획을 지킨 것입니다.</p>
         </div>
       `;
 
@@ -871,7 +875,10 @@
       const paintWorkoutDraft = () => {
         const morningChecked = workoutForm.querySelectorAll('[data-morning-id]:checked').length;
         const morningStatus = document.getElementById('morningStatus');
-        morningStatus.textContent = morningChecked === morningRoutine.length ? '완료 ✓' : `${morningChecked} / ${morningRoutine.length}`;
+        const optionalMorning = morningRoutine.every(item => item.optional);
+        morningStatus.textContent = optionalMorning
+          ? morningChecked ? '선택 완료 ✓' : '선택 · 휴식 OK'
+          : morningChecked === morningRoutine.length ? '완료 ✓' : `${morningChecked} / ${morningRoutine.length}`;
         morningStatus.className = morningChecked === morningRoutine.length
           ? 'rounded-full bg-lime/15 px-3 py-1.5 text-xs font-bold text-lime'
           : 'rounded-full bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-400';
@@ -925,7 +932,8 @@
           }
         });
         today.morningExercises = morningValues;
-        today.morning = morningRoutine.length > 0 && morningRoutine.every(item => morningValues[item.id]);
+        const requiredMorningRoutine = morningRoutine.filter(item => !item.optional);
+        today.morning = requiredMorningRoutine.length > 0 && requiredMorningRoutine.every(item => morningValues[item.id]);
         today.exercises = exerciseValues;
         today.workoutSaved = true;
         if (!saveStore()) {
@@ -952,6 +960,7 @@
         const dayData = store.days[key] || {};
         const morningValues = dayData.morningExercises || {};
         const dayMorningRoutine = getMorningRoutine(date.getDay());
+        const optionalMorning = dayMorningRoutine.every(item => item.optional);
         const morningCount = dayData.morning === true && dayMorningRoutine.length
           ? dayMorningRoutine.length
           : dayMorningRoutine.filter(item => morningValues[item.id]).length;
@@ -963,7 +972,8 @@
           key,
           morningCount,
           morningTotal: dayMorningRoutine.length,
-          morningComplete: dayMorningRoutine.length > 0 && morningCount === dayMorningRoutine.length,
+          morningComplete: optionalMorning ? morningCount > 0 : dayMorningRoutine.length > 0 && morningCount === dayMorningRoutine.length,
+          optionalMorning,
           eveningCount,
           eveningTotal: dayRoutine.exercises.length,
           eveningComplete: dayRoutine.exercises.length > 0 && eveningCount === dayRoutine.exercises.length,
@@ -1009,7 +1019,9 @@
             ? `<i class="h-1.5 w-1.5 rounded-full ${snapshot.eveningComplete ? 'bg-lime' : 'bg-lime/35'}"></i>`
             : '';
           const weightDot = snapshot.hasWeight ? '<i class="h-1.5 w-1.5 rounded-full bg-sky-400"></i>' : '';
-          const morningAria = snapshot.morningTotal ? `아침 ${snapshot.morningCount}/${snapshot.morningTotal}` : '아침 회복일';
+          const morningAria = snapshot.optionalMorning
+            ? snapshot.morningCount ? '선택 천계 완료' : '회복일, 천계 선택 가능'
+            : `아침 ${snapshot.morningCount}/${snapshot.morningTotal}`;
           const eveningAria = snapshot.eveningTotal ? `저녁 ${snapshot.eveningCount}/${snapshot.eveningTotal}` : '저녁 회복일';
           const aria = `${month + 1}월 ${dayNumber}일, ${morningAria}, ${eveningAria}${snapshot.hasWeight ? ', 체중 기록 있음' : ''}`;
           return `
@@ -1070,6 +1082,7 @@
           const dayData = store.days[key] || {};
           const morningValues = dayData.morningExercises || {};
           const dayMorningRoutine = getMorningRoutine(date.getDay());
+          const optionalMorning = dayMorningRoutine.every(item => item.optional);
           const morningCount = dayData.morning === true && dayMorningRoutine.length
             ? dayMorningRoutine.length
             : dayMorningRoutine.filter(item => morningValues[item.id]).length;
@@ -1080,7 +1093,7 @@
           const hasWorkout = Boolean(dayData.workoutSaved || morningCount || Object.keys(dayExercises).length);
           const recorded = hasWeight || hasWorkout;
           if (recorded) recordedDays += 1;
-          if (dayMorningRoutine.length && morningCount === dayMorningRoutine.length) morningDays += 1;
+          if (!optionalMorning && dayMorningRoutine.length && morningCount === dayMorningRoutine.length) morningDays += 1;
           if (dayRoutine.exercises.length && eveningCount === dayRoutine.exercises.length) eveningDays += 1;
 
           const isToday = key === dateKey;
@@ -1093,7 +1106,7 @@
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap gap-1.5">
-                  <span class="rounded-full bg-coral/10 px-2 py-1 text-[10px] font-bold text-coral">${dayMorningRoutine.length ? `아침 ${morningCount}/${dayMorningRoutine.length}` : '아침 회복'}</span>
+                  <span class="rounded-full bg-coral/10 px-2 py-1 text-[10px] font-bold text-coral">${optionalMorning ? morningCount ? '선택 천계 완료' : '회복 · 천계 선택' : `아침 ${morningCount}/${dayMorningRoutine.length}`}</span>
                   <span class="rounded-full bg-lime/10 px-2 py-1 text-[10px] font-bold text-lime">${dayRoutine.exercises.length ? `저녁 ${eveningCount}/${dayRoutine.exercises.length}` : '저녁 회복'}</span>
                 </div>
               </div>
