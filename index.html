@@ -220,7 +220,7 @@
       <div class="mb-5">
         <p class="text-sm font-bold text-sky-400">HISTORY</p>
         <h2 class="mt-1 text-3xl font-black tracking-tight text-white">운동 기록</h2>
-        <p class="mt-2 text-sm text-slate-400">출석 달력과 운동별 중량 변화를 확인하세요.</p>
+        <p class="mt-2 text-sm text-slate-400">날짜를 눌러 그날의 체중과 운동 기록을 확인하세요.</p>
       </div>
 
       <section class="mb-4 grid grid-cols-2 gap-3">
@@ -250,6 +250,7 @@
           <span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span>
         </div>
         <div id="monthCalendar" class="grid grid-cols-7 gap-1"></div>
+        <p class="mt-3 text-center text-[10px] font-bold text-slate-500">날짜를 누르면 상세 기록이 열립니다.</p>
         <div class="mt-4 flex flex-wrap justify-center gap-3 text-[10px] font-bold text-slate-500">
           <span class="flex items-center gap-1"><i class="h-2 w-2 rounded-full bg-coral"></i>아침</span>
           <span class="flex items-center gap-1"><i class="h-2 w-2 rounded-full bg-lime"></i>저녁</span>
@@ -400,6 +401,22 @@
       </a>
     </div>
   </nav>
+
+  <div id="dayDetailModal" class="fixed inset-0 z-[70] hidden" role="dialog" aria-modal="true" aria-labelledby="dayDetailDate">
+    <button type="button" data-close-day-detail class="absolute inset-0 bg-black/70 backdrop-blur-sm" aria-label="상세 기록 닫기"></button>
+    <section class="absolute inset-x-0 bottom-0 mx-auto max-h-[88vh] max-w-md overflow-y-auto rounded-t-[2rem] border border-white/10 bg-panel px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-4 shadow-2xl">
+      <div class="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20"></div>
+      <div class="mb-5 flex items-start justify-between gap-3">
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-[.18em] text-sky-400">Daily Detail</p>
+          <h2 id="dayDetailDate" class="mt-1 text-xl font-black text-white"></h2>
+          <p id="dayDetailRoutine" class="mt-1 text-sm font-semibold text-slate-400"></p>
+        </div>
+        <button id="dayDetailCloseButton" type="button" data-close-day-detail class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[.05] text-xl font-black text-white" aria-label="상세 기록 닫기">×</button>
+      </div>
+      <div id="dayDetailContent" class="space-y-3"></div>
+    </section>
+  </div>
 
   <script>
     (() => {
@@ -1025,10 +1042,10 @@
           const eveningAria = snapshot.eveningTotal ? `저녁 ${snapshot.eveningCount}/${snapshot.eveningTotal}` : '저녁 회복일';
           const aria = `${month + 1}월 ${dayNumber}일, ${morningAria}, ${eveningAria}${snapshot.hasWeight ? ', 체중 기록 있음' : ''}`;
           return `
-            <div aria-label="${aria}" class="flex min-h-14 flex-col items-center justify-center rounded-xl border ${isToday ? 'border-lime/40 bg-lime/[.08]' : 'border-white/[.06] bg-ink/35'} ${isFuture ? 'opacity-30' : ''}">
+            <button type="button" data-day-detail="${snapshot.key}" aria-label="${aria}. 상세 기록 보기" ${isFuture ? 'disabled' : ''} class="flex min-h-14 flex-col items-center justify-center rounded-xl border transition active:scale-95 disabled:cursor-not-allowed ${isToday ? 'border-lime/40 bg-lime/[.08]' : 'border-white/[.06] bg-ink/35'} ${isFuture ? 'opacity-30' : ''}">
               <strong class="text-xs font-black ${isToday ? 'text-lime' : 'text-slate-300'}">${dayNumber}</strong>
               <span class="mt-2 flex min-h-1.5 gap-1">${morningDot}${eveningDot}${weightDot}</span>
-            </div>
+            </button>
           `;
         }).join('');
 
@@ -1057,6 +1074,134 @@
       document.getElementById('currentMonthButton').addEventListener('click', () => {
         monthCursor = new Date(now.getFullYear(), now.getMonth(), 1);
         renderMonthCalendar();
+      });
+
+      const dayDetailModal = document.getElementById('dayDetailModal');
+      const dayDetailCloseButton = document.getElementById('dayDetailCloseButton');
+      let dayDetailReturnFocus = null;
+      const formatSavedValue = value => String(value ?? '').trim();
+      const closeDayDetail = () => {
+        dayDetailModal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+        dayDetailReturnFocus?.focus();
+        dayDetailReturnFocus = null;
+      };
+      const openDayDetail = (key, trigger) => {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) return;
+        const [year, month, day] = key.split('-').map(Number);
+        const selectedDate = new Date(year, month - 1, day);
+        const dayData = store.days[key] || {};
+        const morningPlan = getMorningRoutine(selectedDate.getDay());
+        const morningValues = dayData.morningExercises || {};
+        const dayRoutine = routines[selectedDate.getDay()];
+        const dayExercises = dayData.exercises || {};
+        const hasWeight = hasOwn(store.weights, key) && Number.isFinite(Number(store.weights[key]));
+        const morningDoneCount = morningPlan.filter(item => dayData.morning === true || morningValues[item.id] === true).length;
+        const eveningDoneCount = dayRoutine.exercises.filter(exercise => dayExercises[exercise.id]?.done === true).length;
+        const workoutDoneCount = morningDoneCount + eveningDoneCount;
+        const hasWorkoutRecord = Boolean(dayData.workoutSaved) || Object.keys(morningValues).length > 0 || Object.keys(dayExercises).length > 0;
+        const hasAnyRecord = hasWeight || hasWorkoutRecord || Boolean(String(dayData.memo || '').trim());
+        const workoutStatus = workoutDoneCount > 0
+          ? `${workoutDoneCount}개 완료`
+          : hasWorkoutRecord ? '완료 운동 없음' : '운동 미기록';
+
+        document.getElementById('dayDetailDate').textContent = new Intl.DateTimeFormat('ko-KR', {
+          year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+        }).format(selectedDate);
+        document.getElementById('dayDetailRoutine').textContent = dayRoutine.title;
+
+        const morningItems = morningPlan.map(item => {
+          const done = dayData.morning === true || morningValues[item.id] === true;
+          const status = done ? '완료' : item.optional ? '휴식' : '미완료';
+          return `
+            <div class="flex items-center justify-between gap-3 rounded-xl bg-ink/50 px-3 py-3">
+              <div>
+                <strong class="block text-sm font-extrabold text-white">${item.name}${item.optional ? ' · 선택' : ''}</strong>
+                <span class="text-[11px] font-bold text-slate-500">${item.detail}</span>
+              </div>
+              <span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black ${done ? 'bg-coral/15 text-coral' : 'bg-white/[.06] text-slate-500'}">${status}</span>
+            </div>
+          `;
+        }).join('');
+
+        const eveningItems = dayRoutine.exercises.length ? dayRoutine.exercises.map(exercise => {
+          const saved = dayExercises[exercise.id] || {};
+          const done = saved.done === true;
+          const selectedName = formatSavedValue(saved.variant) || exercise.name;
+          let recordText = '';
+          if (exercise.id === 'cardio') {
+            const details = [
+              formatSavedValue(saved.incline) && `경사 ${escapeAttribute(saved.incline)}`,
+              formatSavedValue(saved.speed) && `속도 ${escapeAttribute(saved.speed)}`,
+              formatSavedValue(saved.duration) && `${escapeAttribute(saved.duration)}분`
+            ].filter(Boolean);
+            recordText = details.join(' · ');
+          } else {
+            const details = [];
+            if (selectedName !== exercise.name) details.push(escapeAttribute(selectedName));
+            if (formatSavedValue(saved.weight)) {
+              details.push(exercise.id === 'hanging-knee-raise' && Number(saved.weight) === 0
+                ? '맨몸'
+                : `${escapeAttribute(saved.weight)}kg`);
+            }
+            if (formatSavedValue(saved.reps)) details.push(`${escapeAttribute(saved.reps)}회`);
+            recordText = details.join(' · ');
+          }
+          return `
+            <div class="rounded-xl border ${done ? 'border-lime/15 bg-lime/[.05]' : 'border-white/[.06] bg-ink/45'} px-3 py-3">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <strong class="block text-sm font-extrabold ${done ? 'text-white' : 'text-slate-500'}">${exercise.name}</strong>
+                  <span class="text-[11px] font-bold text-slate-500">${exercise.sets}</span>
+                  ${recordText ? `<p class="mt-1 text-[11px] font-bold text-sky-300">${recordText}</p>` : ''}
+                </div>
+                <span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black ${done ? 'bg-lime/15 text-lime' : 'bg-white/[.06] text-slate-500'}">${done ? '완료' : '미완료'}</span>
+              </div>
+            </div>
+          `;
+        }).join('') : `
+          <div class="rounded-xl border border-sky-400/15 bg-sky-400/[.06] px-3 py-4 text-center text-xs font-bold text-sky-300">저녁 회복일</div>
+        `;
+
+        const memo = String(dayData.memo || '').trim();
+        document.getElementById('dayDetailContent').innerHTML = `
+          ${!hasAnyRecord ? '<div class="rounded-2xl border border-dashed border-white/10 bg-white/[.03] px-4 py-5 text-center text-sm font-bold text-slate-500">저장된 기록이 없는 날입니다.</div>' : ''}
+          <div class="grid grid-cols-2 gap-2">
+            <div class="rounded-2xl bg-white/[.04] p-3">
+              <span class="text-[10px] font-bold text-slate-500">체중</span>
+              <strong class="mt-1 block text-lg font-black text-white">${hasWeight ? `${Number(store.weights[key]).toFixed(1)}kg` : '기록 없음'}</strong>
+            </div>
+            <div class="rounded-2xl bg-white/[.04] p-3">
+              <span class="text-[10px] font-bold text-slate-500">운동 상태</span>
+              <strong class="mt-1 block text-sm font-black ${workoutDoneCount > 0 ? 'text-lime' : 'text-slate-500'}">${workoutStatus}</strong>
+            </div>
+          </div>
+          <section class="rounded-2xl border border-white/10 bg-white/[.025] p-3">
+            <h3 class="mb-2 text-xs font-black text-coral">아침 유산소</h3>
+            ${morningItems}
+          </section>
+          <section class="rounded-2xl border border-white/10 bg-white/[.025] p-3">
+            <h3 class="mb-2 text-xs font-black text-lime">저녁 운동</h3>
+            <div class="space-y-2">${eveningItems}</div>
+          </section>
+          ${memo ? `<section class="rounded-2xl border border-white/10 bg-white/[.025] p-3"><h3 class="mb-2 text-xs font-black text-sky-400">메모</h3><p class="whitespace-pre-wrap text-sm leading-relaxed text-slate-300">${escapeAttribute(memo)}</p></section>` : ''}
+        `;
+
+        dayDetailReturnFocus = trigger || document.activeElement;
+        dayDetailModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        dayDetailCloseButton.focus();
+      };
+
+      document.getElementById('monthCalendar').addEventListener('click', event => {
+        const trigger = event.target.closest('[data-day-detail]');
+        if (trigger && !trigger.disabled) openDayDetail(trigger.dataset.dayDetail, trigger);
+      });
+      dayDetailModal.querySelectorAll('[data-close-day-detail]').forEach(button => {
+        button.addEventListener('click', closeDayDetail);
+      });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !dayDetailModal.classList.contains('hidden')) closeDayDetail();
       });
 
       const renderHistory = () => {
