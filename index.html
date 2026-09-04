@@ -1078,7 +1078,9 @@
 
       const dayDetailModal = document.getElementById('dayDetailModal');
       const dayDetailCloseButton = document.getElementById('dayDetailCloseButton');
+      const dayDetailContent = document.getElementById('dayDetailContent');
       let dayDetailReturnFocus = null;
+      let activeDayDetailKey = null;
       const formatSavedValue = value => String(value ?? '').trim();
       const closeDayDetail = () => {
         dayDetailModal.classList.add('hidden');
@@ -1088,6 +1090,7 @@
       };
       const openDayDetail = (key, trigger) => {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) return;
+        activeDayDetailKey = key;
         const [year, month, day] = key.split('-').map(Number);
         const selectedDate = new Date(year, month - 1, day);
         const dayData = store.days[key] || {};
@@ -1164,7 +1167,7 @@
         `;
 
         const memo = String(dayData.memo || '').trim();
-        document.getElementById('dayDetailContent').innerHTML = `
+        dayDetailContent.innerHTML = `
           ${!hasAnyRecord ? '<div class="rounded-2xl border border-dashed border-white/10 bg-white/[.03] px-4 py-5 text-center text-sm font-bold text-slate-500">저장된 기록이 없는 날입니다.</div>' : ''}
           <div class="grid grid-cols-2 gap-2">
             <div class="rounded-2xl bg-white/[.04] p-3">
@@ -1185,12 +1188,88 @@
             <div class="space-y-2">${eveningItems}</div>
           </section>
           ${memo ? `<section class="rounded-2xl border border-white/10 bg-white/[.025] p-3"><h3 class="mb-2 text-xs font-black text-sky-400">메모</h3><p class="whitespace-pre-wrap text-sm leading-relaxed text-slate-300">${escapeAttribute(memo)}</p></section>` : ''}
+          ${key < dateKey ? `<button type="button" data-edit-day="${key}" class="min-h-12 w-full rounded-2xl bg-lime px-4 text-sm font-black text-ink transition active:scale-[.98]">이 날짜 기록 입력·수정</button>` : ''}
         `;
 
-        dayDetailReturnFocus = trigger || document.activeElement;
+        if (trigger || !dayDetailReturnFocus) dayDetailReturnFocus = trigger || document.activeElement;
         dayDetailModal.classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
         dayDetailCloseButton.focus();
+      };
+
+      const openDayEditor = key => {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(key) || key >= dateKey) return;
+        const [year, month, day] = key.split('-').map(Number);
+        const selectedDate = new Date(year, month - 1, day);
+        const dayData = store.days[key] || {};
+        const morningPlan = getMorningRoutine(selectedDate.getDay());
+        const morningValues = dayData.morningExercises || {};
+        const dayRoutine = routines[selectedDate.getDay()];
+        const dayExercises = dayData.exercises || {};
+        const weightValue = hasOwn(store.weights, key) ? store.weights[key] : '';
+
+        const morningFields = morningPlan.map(item => {
+          const done = dayData.morning === true || morningValues[item.id] === true;
+          return `
+            <label class="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-ink/50 px-3">
+              <input type="checkbox" data-day-edit-morning-id="${item.id}" ${done ? 'checked' : ''} class="h-5 w-5 shrink-0 rounded accent-coral">
+              <span class="min-w-0 flex-1"><strong class="block text-sm font-extrabold text-white">${item.name}${item.optional ? ' · 선택' : ''}</strong><span class="text-[11px] font-bold text-slate-500">${item.detail}</span></span>
+              <span class="text-[10px] font-black text-slate-500">완료</span>
+            </label>
+          `;
+        }).join('');
+
+        const eveningFields = dayRoutine.exercises.length ? dayRoutine.exercises.map(exercise => {
+          const saved = dayExercises[exercise.id] || {};
+          const isCardio = exercise.id === 'cardio';
+          const isBodyweight = exercise.id === 'hanging-knee-raise';
+          const variantOptions = [exercise.name, ...(exercise.alternatives || [])]
+            .filter((name, optionIndex, names) => names.indexOf(name) === optionIndex);
+          const selectedVariant = saved.variant || exercise.name;
+          const inputs = isCardio ? `
+            <div class="mt-3 grid grid-cols-3 gap-2">
+              <label><span class="mb-1 block text-[10px] font-bold text-slate-500">경사</span><input type="number" inputmode="decimal" min="0" step="0.5" data-field="incline" value="${escapeAttribute(saved.incline ?? 11)}" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-2 py-2.5 text-sm font-bold text-white outline-none focus:border-lime/60"></label>
+              <label><span class="mb-1 block text-[10px] font-bold text-slate-500">속도</span><input type="number" inputmode="decimal" min="0" step="0.1" data-field="speed" value="${escapeAttribute(saved.speed ?? saved.weight ?? '4.0')}" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-2 py-2.5 text-sm font-bold text-white outline-none focus:border-lime/60"></label>
+              <label><span class="mb-1 block text-[10px] font-bold text-slate-500">분</span><input type="number" inputmode="numeric" min="0" step="1" data-field="duration" value="${escapeAttribute(saved.duration ?? saved.reps ?? exercise.duration ?? '')}" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-2 py-2.5 text-sm font-bold text-white outline-none focus:border-lime/60"></label>
+            </div>
+          ` : `
+            ${exercise.alternatives?.length ? `<label class="mt-3 block"><span class="mb-1 block text-[10px] font-bold text-slate-500">오늘 한 운동</span><select data-field="variant" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none focus:border-lime/60">${variantOptions.map(name => `<option value="${escapeAttribute(name)}" ${name === selectedVariant ? 'selected' : ''}>${name}</option>`).join('')}</select></label>` : ''}
+            <div class="mt-3 grid grid-cols-2 gap-2">
+              <label><span class="mb-1 block text-[10px] font-bold text-slate-500">${isBodyweight ? '추가 중량 (kg)' : '무게 (kg)'}</span><input type="number" inputmode="decimal" min="0" step="0.5" data-field="weight" value="${escapeAttribute(saved.weight)}" placeholder="0" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none focus:border-lime/60"></label>
+              <label><span class="mb-1 block text-[10px] font-bold text-slate-500">횟수</span><input type="number" inputmode="numeric" min="0" step="1" data-field="reps" value="${escapeAttribute(saved.reps)}" placeholder="0" class="w-full rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5 text-sm font-bold text-white outline-none focus:border-lime/60"></label>
+            </div>
+          `;
+          return `
+            <article data-day-edit-exercise="${exercise.id}" class="rounded-xl border border-white/10 bg-ink/45 p-3">
+              <div class="flex items-start justify-between gap-3">
+                <div><strong class="block text-sm font-extrabold text-white">${exercise.name}</strong><span class="text-[11px] font-bold text-slate-500">${exercise.sets}</span></div>
+                <label class="flex cursor-pointer items-center gap-2 text-[10px] font-black text-slate-400">완료<input type="checkbox" data-field="done" ${saved.done ? 'checked' : ''} class="h-5 w-5 rounded accent-lime"></label>
+              </div>
+              ${inputs}
+            </article>
+          `;
+        }).join('') : '<div class="rounded-xl border border-sky-400/15 bg-sky-400/[.06] px-3 py-4 text-center text-xs font-bold text-sky-300">저녁 회복일 · 입력할 운동 없음</div>';
+
+        dayDetailContent.innerHTML = `
+          <form id="dayEditForm" data-edit-date="${key}" class="space-y-3">
+            <div class="rounded-2xl border border-sky-400/15 bg-sky-400/[.06] px-3 py-3 text-xs font-bold leading-relaxed text-sky-300">깜빡한 기록을 입력하거나 기존 기록을 고친 뒤 저장하세요.</div>
+            <section class="rounded-2xl border border-white/10 bg-white/[.025] p-3">
+              <div class="grid grid-cols-2 gap-2">
+                <label><span class="mb-1 block text-[10px] font-bold text-slate-500">체중 (kg)</span><input type="number" inputmode="decimal" min="30" max="300" step="0.1" data-day-edit-weight value="${escapeAttribute(weightValue)}" placeholder="비워두기 가능" class="w-full rounded-xl border border-white/10 bg-ink/70 px-3 py-3 text-sm font-bold text-white outline-none focus:border-lime/60"></label>
+                <label><span class="mb-1 block text-[10px] font-bold text-slate-500">날짜</span><input type="text" value="${key}" disabled class="w-full rounded-xl border border-white/10 bg-white/[.03] px-3 py-3 text-sm font-bold text-slate-500"></label>
+              </div>
+              <label class="mt-3 block"><span class="mb-1 block text-[10px] font-bold text-slate-500">메모</span><textarea rows="3" maxlength="240" data-day-edit-memo class="w-full resize-none rounded-xl border border-white/10 bg-ink/70 px-3 py-3 text-sm text-white outline-none focus:border-lime/60">${escapeAttribute(dayData.memo || '')}</textarea></label>
+            </section>
+            <section class="rounded-2xl border border-white/10 bg-white/[.025] p-3"><h3 class="mb-2 text-xs font-black text-coral">아침 유산소</h3>${morningFields}</section>
+            <section class="rounded-2xl border border-white/10 bg-white/[.025] p-3"><h3 class="mb-2 text-xs font-black text-lime">저녁 운동</h3><div class="space-y-2">${eveningFields}</div></section>
+            <p data-day-edit-feedback class="min-h-5 text-center text-xs font-bold text-coral" aria-live="polite"></p>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" data-cancel-day-edit class="min-h-12 rounded-2xl border border-white/15 bg-white/[.05] px-4 text-sm font-extrabold text-white">취소</button>
+              <button type="submit" class="min-h-12 rounded-2xl bg-lime px-4 text-sm font-black text-ink">이 날짜에 저장</button>
+            </div>
+          </form>
+        `;
+        dayDetailContent.querySelector('[data-day-edit-weight]')?.focus();
       };
 
       document.getElementById('monthCalendar').addEventListener('click', event => {
@@ -1199,6 +1278,78 @@
       });
       dayDetailModal.querySelectorAll('[data-close-day-detail]').forEach(button => {
         button.addEventListener('click', closeDayDetail);
+      });
+      dayDetailContent.addEventListener('click', event => {
+        const editButton = event.target.closest('[data-edit-day]');
+        if (editButton) openDayEditor(editButton.dataset.editDay);
+        if (event.target.closest('[data-cancel-day-edit]') && activeDayDetailKey) openDayDetail(activeDayDetailKey);
+      });
+      dayDetailContent.addEventListener('submit', event => {
+        if (event.target.id !== 'dayEditForm') return;
+        event.preventDefault();
+        const form = event.target;
+        const key = form.dataset.editDate;
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(key) || key >= dateKey) return;
+        const weightInput = form.querySelector('[data-day-edit-weight]');
+        const weightText = weightInput.value.trim();
+        if (weightText) {
+          const weight = Number(weightText);
+          if (!Number.isFinite(weight) || weight < 30 || weight > 300) {
+            form.querySelector('[data-day-edit-feedback]').textContent = '체중을 30~300kg 범위로 확인해 주세요.';
+            weightInput.focus();
+            return;
+          }
+          store.weights[key] = weight;
+        } else {
+          delete store.weights[key];
+        }
+
+        const [year, month, day] = key.split('-').map(Number);
+        const selectedDate = new Date(year, month - 1, day);
+        const morningPlan = getMorningRoutine(selectedDate.getDay());
+        const targetDay = store.days[key] && typeof store.days[key] === 'object' ? store.days[key] : {};
+        const morningValues = {};
+        form.querySelectorAll('[data-day-edit-morning-id]').forEach(input => {
+          morningValues[input.dataset.dayEditMorningId] = input.checked;
+        });
+        const exerciseValues = {};
+        form.querySelectorAll('[data-day-edit-exercise]').forEach(card => {
+          const id = card.dataset.dayEditExercise;
+          const done = card.querySelector('[data-field="done"]').checked;
+          if (id === 'cardio') {
+            exerciseValues[id] = {
+              done,
+              cardioType: 'treadmill',
+              incline: card.querySelector('[data-field="incline"]').value,
+              speed: card.querySelector('[data-field="speed"]').value,
+              duration: card.querySelector('[data-field="duration"]').value
+            };
+          } else {
+            exerciseValues[id] = {
+              done,
+              variant: card.querySelector('[data-field="variant"]')?.value || '',
+              weight: card.querySelector('[data-field="weight"]').value,
+              reps: card.querySelector('[data-field="reps"]').value
+            };
+          }
+        });
+        const requiredMorning = morningPlan.filter(item => !item.optional);
+        targetDay.morningExercises = morningValues;
+        targetDay.morning = requiredMorning.length > 0 && requiredMorning.every(item => morningValues[item.id]);
+        targetDay.exercises = exerciseValues;
+        targetDay.memo = form.querySelector('[data-day-edit-memo]').value.trim();
+        targetDay.workoutSaved = true;
+        store.days[key] = targetDay;
+        if (!saveStore()) {
+          form.querySelector('[data-day-edit-feedback]').textContent = '저장하지 못했습니다. 브라우저 저장 공간을 확인해 주세요.';
+          return;
+        }
+        renderDashboard();
+        renderMonthCalendar();
+        renderHistory();
+        renderExerciseChart();
+        dayDetailReturnFocus = document.querySelector(`[data-day-detail="${key}"]`) || dayDetailReturnFocus;
+        openDayDetail(key);
       });
       document.addEventListener('keydown', event => {
         if (event.key === 'Escape' && !dayDetailModal.classList.contains('hidden')) closeDayDetail();
