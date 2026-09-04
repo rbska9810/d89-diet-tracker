@@ -1,6 +1,6 @@
 {
-  "name": "D-89 다이어트 & 운동 트래커",
-  "short_name": "D-89 트래커",
+  "name": "다이어트 트래커",
+  "short_name": "다이어트 트래커",
   "description": "목표 체중, 일일 체중, 아침·저녁 운동을 기록하는 모바일 트래커",
   "lang": "ko-KR",
   "start_url": "./#dashboard",

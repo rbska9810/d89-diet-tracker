@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07111f">
-  <meta name="application-name" content="D-89 트래커">
+  <meta name="application-name" content="다이어트 트래커">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="D-89 트래커">
-  <meta name="description" content="D-89 다이어트 프로젝트 모바일 기록 트래커">
+  <meta name="apple-mobile-web-app-title" content="다이어트 트래커">
+  <meta name="description" content="다이어트 프로젝트 모바일 기록 트래커">
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="./icon-192.png">
-  <title>D-89 다이어트 & 운동 트래커</title>
+  <title>다이어트 트래커</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -57,7 +57,7 @@
       </div>
       <div class="rounded-2xl border border-lime/20 bg-lime/10 px-3 py-2 text-center shadow-glow">
         <span class="block text-[10px] font-bold uppercase tracking-widest text-lime/70">Goal</span>
-        <span id="projectDay" class="text-xl font-black text-lime">D-89</span>
+        <span id="projectDay" class="text-xl font-black text-lime">D-Day</span>
       </div>
     </header>
 
@@ -224,9 +224,9 @@
 
       <section class="mb-4 grid grid-cols-2 gap-3">
         <div class="rounded-3xl border border-coral/20 bg-coral/10 p-4 shadow-glow">
-          <p class="text-xs font-bold text-coral">현재 연속 출석</p>
+          <p class="text-xs font-bold text-coral">현재 평일 연속 출석</p>
           <strong id="currentStreakStat" class="mt-2 block text-3xl font-black text-white">0일</strong>
-          <span class="mt-1 block text-[11px] font-bold text-slate-400">오늘 또는 어제부터 계산</span>
+          <span class="mt-1 block text-[11px] font-bold text-slate-400">주말 휴식은 기록을 끊지 않아요</span>
         </div>
         <div class="rounded-3xl border border-lime/20 bg-lime/10 p-4 shadow-glow">
           <p id="monthAttendanceLabel" class="text-xs font-bold text-lime">이번 달 출석</p>
@@ -574,7 +574,7 @@
         .sort((a, b) => a.date.localeCompare(b.date));
 
       const getDday = targetDate => {
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(targetDate || '')) return 'D-89';
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(targetDate || '')) return 'D-Day';
         const [year, month, day] = targetDate.split('-').map(Number);
         const target = new Date(year, month - 1, day);
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -998,13 +998,19 @@
         };
       };
 
+      const isPlannedWeekday = date => date.getDay() >= 1 && date.getDay() <= 5;
+      const moveToPreviousPlannedDay = date => {
+        do date.setDate(date.getDate() - 1);
+        while (!isPlannedWeekday(date));
+      };
       const calculateCurrentStreak = () => {
         const cursor = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        if (!getDaySnapshot(cursor).attended) cursor.setDate(cursor.getDate() - 1);
+        while (!isPlannedWeekday(cursor)) cursor.setDate(cursor.getDate() - 1);
+        if (!getDaySnapshot(cursor).attended) moveToPreviousPlannedDay(cursor);
         let streak = 0;
         while (streak < 3650 && getDaySnapshot(cursor).attended) {
           streak += 1;
-          cursor.setDate(cursor.getDate() - 1);
+          moveToPreviousPlannedDay(cursor);
         }
         return streak;
       };
@@ -1018,7 +1024,8 @@
         const totalCells = Math.ceil((leadingBlanks + daysInMonth) / 7) * 7;
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const isCurrentMonth = year === now.getFullYear() && month === now.getMonth();
-        let attendanceDays = 0;
+        let plannedDays = 0;
+        let attendedPlannedDays = 0;
 
         const cells = Array.from({ length: totalCells }, (_, index) => {
           const dayNumber = index - leadingBlanks + 1;
@@ -1027,7 +1034,10 @@
           const snapshot = getDaySnapshot(date);
           const isToday = snapshot.key === dateKey;
           const isFuture = date > todayStart;
-          if (snapshot.attended && !isFuture) attendanceDays += 1;
+          if (!isFuture && isPlannedWeekday(date)) {
+            plannedDays += 1;
+            if (snapshot.attended) attendedPlannedDays += 1;
+          }
           const morningDot = snapshot.morningCount
             ? `<i class="h-1.5 w-1.5 rounded-full ${snapshot.morningComplete ? 'bg-coral' : 'bg-coral/35'}"></i>`
             : '';
@@ -1048,12 +1058,11 @@
           `;
         }).join('');
 
-        const elapsedDays = isCurrentMonth ? now.getDate() : daysInMonth;
-        const attendanceRate = elapsedDays ? Math.round((attendanceDays / elapsedDays) * 100) : 0;
+        const attendanceRate = plannedDays ? Math.round((attendedPlannedDays / plannedDays) * 100) : 0;
         document.getElementById('monthLabel').textContent = `${year}년 ${month + 1}월`;
-        document.getElementById('monthAttendanceLabel').textContent = `${month + 1}월 출석`;
-        document.getElementById('monthAttendanceStat').textContent = `${attendanceDays}일`;
-        document.getElementById('monthRateText').textContent = `${elapsedDays}일 중 ${attendanceRate}%`;
+        document.getElementById('monthAttendanceLabel').textContent = `${month + 1}월 평일 출석`;
+        document.getElementById('monthAttendanceStat').textContent = `${attendedPlannedDays}일`;
+        document.getElementById('monthRateText').textContent = `평일 ${plannedDays}일 중 ${attendanceRate}%`;
         document.getElementById('currentStreakStat').textContent = `${calculateCurrentStreak()}일`;
         document.getElementById('monthCalendar').innerHTML = cells;
         document.getElementById('nextMonthButton').disabled = isCurrentMonth;
@@ -1155,7 +1164,7 @@
                 <div class="min-w-0">
                   <strong class="block text-sm font-extrabold ${done ? 'text-white' : 'text-slate-500'}">${exercise.name}</strong>
                   <span class="text-[11px] font-bold text-slate-500">${exercise.sets}</span>
-                  ${recordText ? `<p class="mt-1 text-[11px] font-bold text-sky-300">${recordText}</p>` : ''}
+                  ${done && recordText ? `<p class="mt-1 text-[11px] font-bold text-sky-300">${recordText}</p>` : ''}
                 </div>
                 <span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black ${done ? 'bg-lime/15 text-lime' : 'bg-white/[.06] text-slate-500'}">${done ? '완료' : '미완료'}</span>
               </div>
@@ -1440,9 +1449,10 @@
       const getExerciseEntries = exerciseId => Object.entries(store.days)
         .map(([date, dayData]) => ({
           date,
+          done: dayData?.exercises?.[exerciseId]?.done === true,
           weight: Number(dayData?.exercises?.[exerciseId]?.weight)
         }))
-        .filter(entry => /^\d{4}-\d{2}-\d{2}$/.test(entry.date) && Number.isFinite(entry.weight) && entry.weight > 0)
+        .filter(entry => entry.done && /^\d{4}-\d{2}-\d{2}$/.test(entry.date) && Number.isFinite(entry.weight) && entry.weight > 0)
         .sort((a, b) => a.date.localeCompare(b.date));
 
       const firstExerciseWithData = exerciseCatalog.find(exercise => getExerciseEntries(exercise.id).length);
@@ -1531,7 +1541,7 @@
       const dataFeedback = document.getElementById('dataFeedback');
       document.getElementById('exportButton').addEventListener('click', () => {
         const backup = {
-          app: 'D-89 Diet Tracker',
+          app: 'Diet Tracker',
           version: 1,
           exportedAt: new Date().toISOString(),
           data: store
@@ -1540,7 +1550,7 @@
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `d89-backup-${dateKey}.json`;
+        link.download = `diet-tracker-backup-${dateKey}.json`;
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -1568,7 +1578,7 @@
           location.hash = 'dashboard';
           location.reload();
         } catch {
-          dataFeedback.textContent = '올바른 D-89 백업 파일이 아닙니다.';
+          dataFeedback.textContent = '올바른 다이어트 트래커 백업 파일이 아닙니다.';
           dataFeedback.className = 'mt-3 min-h-5 text-xs font-bold text-coral';
           event.target.value = '';
         }
@@ -1608,7 +1618,7 @@
         deferredInstallPrompt = null;
         installButton.disabled = true;
         installButton.textContent = '설치 완료';
-        installFeedback.textContent = 'D-89 트래커를 홈 화면에 설치했습니다.';
+        installFeedback.textContent = '다이어트 트래커를 홈 화면에 설치했습니다.';
       });
 
       installButton.addEventListener('click', async () => {
