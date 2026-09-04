@@ -483,17 +483,16 @@
       const cardio = (sets, duration) => ({ id: 'cardio', name: '유산소', sets, duration, kind: 'duration', alternatives: cardioOptions, note: '컨디션에 맞는 종목을 선택' });
       const femaleRoutines = {
         0: { title: '주말 회복일', summary: '저녁 운동 없이 충분히 쉬고 다음 주를 준비하세요.', exercises: [] },
-        1: { title: '하체·엉덩이 집중 1', summary: '워밍업 5분 + 근력운동 + 유산소 20~30분', exercises: [
+        1: { title: '하체 A · 엉덩이 + 앞벅지', summary: '워밍업 5분 + 하체 근력운동 + 유산소 20~30분', exercises: [
           warmup(),
-          { id: 'hip-thrust', name: '힙쓰러스트', sets: '4세트 × 10~12회', note: '엉덩이 수축에 집중', alternatives: ['스미스 머신 힙쓰러스트', '글루트브릿지', '케이블 풀스루', '머신 힙쓰러스트'] },
+          { id: 'hip-thrust', name: '힙쓰러스트', sets: '4세트 × 8~12회', note: '엉덩이 수축에 집중하는 메인 운동', alternatives: ['스미스 머신 힙쓰러스트', '글루트브릿지', '케이블 풀스루', '머신 힙쓰러스트'] },
           { id: 'leg-press', name: '레그프레스', sets: '3세트 × 10~12회', note: '무릎과 발끝 방향을 맞추기', alternatives: ['핵 스쿼트', '스미스 머신 스쿼트', '고블릿 스쿼트', '벨트 스쿼트'] },
           { id: 'split-squat', name: '스플릿 스쿼트', sets: '3세트 × 양쪽 10~12회', note: '좌우 균형을 맞춰 진행', alternatives: ['불가리안 스플릿 스쿼트', '리버스 런지', '워킹 런지', '스텝업'] },
-          { id: 'romanian-deadlift', name: '루마니안 데드리프트', sets: '3세트 × 10~12회', note: '햄스트링과 엉덩이 뒤쪽 자극', alternatives: ['덤벨 루마니안 데드리프트', '스미스 머신 루마니안 데드리프트', '라잉 레그컬', '시티드 레그컬'] },
+          { id: 'leg-extension', name: '레그 익스텐션', sets: '3세트 × 12~15회', note: '앞벅지를 조이고 천천히 내려오기', alternatives: ['스텝업', '고블릿 스쿼트', '내로우 레그프레스', '시시 스쿼트'] },
           { id: 'hip-abduction', name: '힙 어브덕션', sets: '3세트 × 15~20회', note: '반동 없이 벌린 지점에서 잠깐 멈추기', alternatives: ['케이블 힙 어브덕션', '밴드 힙 어브덕션', '사이드 밴드 워크', '사이드 라잉 레그레이즈'] },
           cardio('20~30분', 20)
         ]},
-        2: { title: '등·어깨·팔', summary: '워밍업 5분 + 상체 근력운동 + 유산소 30분', exercises: [
-          warmup(),
+        2: { title: '상체 A · 등 + 어깨 + 팔', summary: '등·어깨 중심 상체 근력운동 + 유산소 30분', exercises: [
           { id: 'lat-pulldown', name: '랫풀다운', sets: '3세트 × 10~12회', note: '어깨를 내리고 광배근으로 당기기', alternatives: ['어시스트 풀업', '뉴트럴 그립 랫풀다운', '머신 풀다운', '원암 케이블 풀다운'] },
           { id: 'seated-row', name: '시티드 로우', sets: '3세트 × 10~12회', note: '허리를 세우고 팔꿈치를 뒤로 당기기', alternatives: ['체스트 서포티드 로우', '머신 로우', '원암 덤벨 로우', '원암 케이블 로우'] },
           { id: 'shoulder-press', name: '숄더프레스', sets: '3세트 × 10~12회', note: '허리가 과하게 꺾이지 않게', alternatives: ['덤벨 숄더프레스', '머신 숄더프레스', '랜드마인 프레스', '스미스 머신 숄더프레스'] },
@@ -501,32 +500,28 @@
           { id: 'triceps-pushdown', name: '트라이셉스 푸시다운', sets: '3세트 × 12~15회', note: '팔꿈치를 몸통 옆에 고정', alternatives: ['오버헤드 케이블 익스텐션', '머신 딥스', '어시스트 딥스', '클로즈그립 푸시업'] },
           cardio('30분', 30)
         ]},
-        3: { title: '전신 + 복근 + 유산소', summary: '피로를 고려한 중간 강도 전신 운동', exercises: [
-          warmup(),
-          { id: 'squat', name: '스쿼트', sets: '3세트 × 12회', note: '무게보다 안정적인 자세에 집중', alternatives: ['고블릿 스쿼트', '스미스 머신 스쿼트', '레그프레스', '핵 스쿼트'] },
-          { id: 'chest-press', name: '체스트프레스', sets: '3세트 × 10~12회', note: '어깨가 들리지 않게 가슴으로 밀기', alternatives: ['덤벨 벤치프레스', '머신 체스트프레스', '스미스 머신 벤치프레스', '푸시업'] },
-          { id: 'lat-pulldown', name: '랫풀다운', sets: '3세트 × 10~12회', note: '가슴을 열고 팔꿈치를 아래로 당기기', alternatives: ['어시스트 풀업', '뉴트럴 그립 랫풀다운', '머신 풀다운', '원암 케이블 풀다운'] },
-          { id: 'glute-bridge', name: '글루트브릿지', sets: '3세트 × 15회', note: '허리보다 엉덩이로 들어 올리기', alternatives: ['힙쓰러스트', '스미스 머신 힙쓰러스트', '머신 힙쓰러스트', '케이블 풀스루'] },
-          { id: 'abs', name: '복근 운동', sets: '5~10분 · 자유 구성', duration: 5, kind: 'duration', note: '플랭크·레그레이즈·크런치 등 편한 종목으로' },
-          cardio('30~40분', 30)
-        ]},
-        4: { title: '하체·엉덩이 집중 2', summary: '워밍업 5분 + 하체 근력운동 + 유산소 20~30분', exercises: [
-          warmup(),
-          { id: 'smith-squat', name: '스미스 머신 스쿼트', sets: '3세트 × 10~12회', note: '발 위치를 잡고 일정한 궤도로 진행', alternatives: ['핵 스쿼트', '고블릿 스쿼트', '레그프레스', '벨트 스쿼트'] },
-          { id: 'bulgarian-split-squat', name: '불가리안 스플릿 스쿼트', sets: '3세트 × 양쪽 10회', note: '앞발 뒤꿈치로 밀어 올라오기', alternatives: ['스플릿 스쿼트', '리버스 런지', '워킹 런지', '스텝업'] },
-          { id: 'leg-extension', name: '레그 익스텐션', sets: '3세트 × 12~15회', note: '무릎을 잠그지 말고 천천히', alternatives: ['스텝업', '고블릿 스쿼트', '내로우 레그프레스', '시시 스쿼트'] },
-          { id: 'hip-thrust', name: '힙쓰러스트', sets: '4세트 × 10~12회', note: '엉덩이 수축에 집중', alternatives: ['스미스 머신 힙쓰러스트', '글루트브릿지', '케이블 풀스루', '머신 힙쓰러스트'] },
+        3: { title: '하체 B · 엉덩이 + 뒷벅지', summary: '월요일과 자극을 나눈 후면 하체 운동 + 유산소 20~30분', exercises: [
+          { id: 'romanian-deadlift', name: '루마니안 데드리프트', sets: '3세트 × 8~12회', note: '햄스트링과 엉덩이 뒤쪽 자극', alternatives: ['덤벨 루마니안 데드리프트', '스미스 머신 루마니안 데드리프트', '케이블 풀스루', '굿모닝'] },
+          { id: 'bulgarian-split-squat', name: '불가리안 스플릿 스쿼트', sets: '3세트 × 양쪽 10~12회', note: '앞발 뒤꿈치로 밀어 올라오기', alternatives: ['스플릿 스쿼트', '리버스 런지', '워킹 런지', '스텝업'] },
+          { id: 'hip-thrust', name: '힙쓰러스트', sets: '4세트 × 8~12회', note: '엉덩이 수축에 집중하는 메인 운동', alternatives: ['스미스 머신 힙쓰러스트', '글루트브릿지', '케이블 풀스루', '머신 힙쓰러스트'] },
+          { id: 'leg-curl', name: '레그컬', sets: '3세트 × 10~15회', note: '반동 없이 뒷벅지로 당기기', alternatives: ['시티드 레그컬', '라잉 레그컬', '스탠딩 레그컬', '짐볼 레그컬'] },
           { id: 'hip-abduction', name: '힙 어브덕션', sets: '3세트 × 15~20회', note: '반동 없이 벌린 지점에서 잠깐 멈추기', alternatives: ['케이블 힙 어브덕션', '밴드 힙 어브덕션', '사이드 밴드 워크', '사이드 라잉 레그레이즈'] },
           cardio('20~30분', 20)
         ]},
-        5: { title: '상체 + 전신 라인', summary: '워밍업 5분 + 상체 근력운동 + 복근 + 유산소 30분', exercises: [
-          warmup(),
-          { id: 'lat-pulldown', name: '랫풀다운', sets: '3세트 × 10~12회', note: '어깨를 내리고 광배근으로 당기기', alternatives: ['어시스트 풀업', '뉴트럴 그립 랫풀다운', '머신 풀다운', '원암 케이블 풀다운'] },
-          { id: 'seated-row', name: '시티드 로우', sets: '3세트 × 10~12회', note: '허리를 세우고 팔꿈치를 뒤로 당기기', alternatives: ['체스트 서포티드 로우', '머신 로우', '원암 덤벨 로우', '원암 케이블 로우'] },
+        4: { title: '상체 B · 가슴 + 등 + 어깨', summary: '가슴을 더한 상체 근력운동 + 유산소 30분', exercises: [
           { id: 'chest-press', name: '체스트프레스', sets: '3세트 × 10~12회', note: '어깨가 들리지 않게 가슴으로 밀기', alternatives: ['덤벨 벤치프레스', '머신 체스트프레스', '스미스 머신 벤치프레스', '푸시업'] },
+          { id: 'lat-pulldown', name: '랫풀다운', sets: '3세트 × 10~12회', note: '가슴을 열고 팔꿈치를 아래로 당기기', alternatives: ['어시스트 풀업', '뉴트럴 그립 랫풀다운', '머신 풀다운', '원암 케이블 풀다운'] },
+          { id: 'seated-row', name: '시티드 로우', sets: '3세트 × 10~12회', note: '허리를 세우고 팔꿈치를 뒤로 당기기', alternatives: ['체스트 서포티드 로우', '머신 로우', '원암 덤벨 로우', '원암 케이블 로우'] },
           { id: 'shoulder-press', name: '숄더프레스', sets: '3세트 × 10~12회', note: '허리가 과하게 꺾이지 않게', alternatives: ['덤벨 숄더프레스', '머신 숄더프레스', '랜드마인 프레스', '스미스 머신 숄더프레스'] },
           { id: 'lateral-raise', name: '레터럴 레이즈', sets: '3세트 × 12~15회', note: '승모근보다 측면 어깨에 집중', alternatives: ['케이블 레터럴 레이즈', '머신 레터럴 레이즈', '원암 케이블 레터럴 레이즈', '린어웨이 레터럴 레이즈'] },
-          { id: 'abs', name: '복근 운동', sets: '5~10분 · 자유 구성', duration: 5, kind: 'duration', note: '원하는 복근 운동을 자유롭게 구성' },
+          cardio('30분', 30)
+        ]},
+        5: { title: '가벼운 전신 + 복근', summary: '무게 욕심 없이 전신을 가볍게 자극하고 유산소 30분', exercises: [
+          { id: 'squat', name: '스쿼트 / 고블릿 스쿼트', sets: '3세트 × 12~15회', note: '가벼운 중량으로 안정적인 자세에 집중', alternatives: ['스쿼트', '고블릿 스쿼트', '스미스 머신 스쿼트', '레그프레스'] },
+          { id: 'lat-pulldown', name: '랫풀다운', sets: '3세트 × 12회', note: '어깨를 내리고 광배근으로 당기기', alternatives: ['어시스트 풀업', '뉴트럴 그립 랫풀다운', '머신 풀다운', '원암 케이블 풀다운'] },
+          { id: 'chest-press', name: '체스트프레스', sets: '3세트 × 12회', note: '무리하지 않는 중량으로 가슴 자극', alternatives: ['덤벨 벤치프레스', '머신 체스트프레스', '스미스 머신 벤치프레스', '푸시업'] },
+          { id: 'glute-bridge', name: '글루트브릿지', sets: '3세트 × 15회', note: '허리보다 엉덩이로 들어 올리기', alternatives: ['힙쓰러스트', '스미스 머신 힙쓰러스트', '머신 힙쓰러스트', '케이블 풀스루'] },
+          { id: 'abs', name: '복근 운동', sets: '레그레이즈 3세트 × 10~15회 + 플랭크 3세트 × 30~45초', duration: 8, kind: 'duration', note: '두 종목을 편한 순서로 진행' },
           cardio('30분', 30)
         ]},
         6: { title: '주말 회복일', summary: '저녁 운동 없이 충분히 쉬고 다음 주를 준비하세요.', exercises: [] }
