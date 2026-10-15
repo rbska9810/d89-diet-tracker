@@ -1,4 +1,4 @@
-const CACHE_NAME = 'd89-tracker-v17';
+const CACHE_NAME = 'd89-tracker-v18';
 const CORE_ASSETS = [
   './',
   './index.html',
